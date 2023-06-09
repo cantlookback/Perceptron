@@ -20,7 +20,7 @@ void NeuralNetwork::setWeights() {
 
 void NeuralNetwork::addLayer(unsigned neurons){
     if (neurons <= 0){
-        std::cout << "Cannot add this layer, arg must be at least '1'\n";
+        std::cout << "Cannot add layer with <1 neurons\n";
         return;
     }
     network.first++;
