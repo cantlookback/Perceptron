@@ -2,7 +2,7 @@
 
 dataset loadData(std::string PATH, unsigned ANS_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
-    
+
     std::vector<std::vector<double>> content;
     std::vector<std::vector<double>> data;
     std::vector<double> ans;
@@ -15,12 +15,12 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT){
         if (!isdigit(dataFile.peek())){
             getline(dataFile, line);
         }
-        
+
         //Parsing through all lines and putting in vector<vector<double>>
     	while (getline(dataFile, line)){
             std::istringstream iss(line);
             std::string token;
-            
+
             while (std::getline(iss, token, ',')){   
                 row.push_back(stod(token));
             }
@@ -32,7 +32,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT){
         //Separating content --> data, answers
         for (std::vector<double> dat : content){
             std::vector<double> buffer;
-            
+
             for (unsigned i = 0; i < dat.size() - ANS_COUNT; i++){
                 buffer.push_back(dat[i]);
             }
@@ -70,6 +70,7 @@ void NeuralNetwork::addLayer(unsigned neurons){
         std::cout << "Cannot add layer with <1 neurons\n";
         return;
     }
+
     network.first++;
     network.second.push_back(neurons);
 }
@@ -84,8 +85,10 @@ void NeuralNetwork::compile(uint64_t trainRate_t, uint64_t alpha_t, uint64_t epo
         std::cout << "Cannot compile model, less than 2 layers\n";
         return;
     }
+
     weights.resize(network.first - 1);
     values.resize(network.first);
+
     for (unsigned i = 0; i <= weights.size(); i++) {
         values[i].resize(network.second[i]);
     }
@@ -97,7 +100,7 @@ void NeuralNetwork::compile(uint64_t trainRate_t, uint64_t alpha_t, uint64_t epo
     trainRate = trainRate_t;
     alpha = alpha_t;
     epochs = epochs_t;
-    
+
     this->setWeights();
     std::cout << "Compiling is done!\n";
 }
@@ -155,7 +158,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
     std::vector<std::vector<double>> GRADs;
     //* dW | no Cleans
     std::vector<std::vector<double>> dW;
-    
+
     d_X.resize(network.first);
     GRADs.resize(network.first - 1);
     dW.resize(weights.size());
@@ -170,9 +173,6 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
         dW[i].resize(weights[i].size());
     }
 
-    trainRate = 1; //Eta
-    alpha = 0.1;
-    
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
 
         for (unsigned set = 0; set < data->size(); set++) {
@@ -194,7 +194,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
                     d_X[i][j] *= sigm_deriv(values[i][j]);
                 }
             }
-            
+
             //Calculating Gradients
             for (unsigned i = 0; i < GRADs.size(); i++) {
                 for (unsigned j = 0; j < GRADs[i].size(); j++) {
@@ -232,4 +232,3 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
     }
     std::cout << '\n';
 }
-
