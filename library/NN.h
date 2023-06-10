@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 
+//Custom structure for dataset
 struct dataset{
     dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
             data(t_data), answers(t_answers){};
@@ -13,6 +14,7 @@ struct dataset{
     std::vector<double> answers;
 };
 
+//PATH - path to .csv file, ANS_COUNT - number of values on the output layer
 dataset loadData(std::string PATH, unsigned ANS_COUNT);
 
 //Overload for vector<> printing
