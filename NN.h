@@ -50,20 +50,20 @@ public:
 
     //Running...
     void feedForward(std::vector<double>* data);
-    
+
 private:
     //Activation funcion
     double sigm(double arg);
 
     //Derivative of sigm
     double sigm_deriv(double arg);
-    
+
     //Setting random base weights
     void setWeights();
 
     //Mean Square Error
     double MSE(double Ytrue);
-    
+
     //* Layers, neurons
     std::pair<int, std::vector<int>> network = {0, {}};
     //* Weights of axons
