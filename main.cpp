@@ -8,6 +8,11 @@ int main(){
 
     NeuralNetwork net;
 
+    //Adding some serious shit
+    //To test how merging works
+    //With several branches
+
+
     net.addLayer(2);
     net.addLayer(3);
     net.addLayer(3);
