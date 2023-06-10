@@ -3,14 +3,27 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+
+//Custom structure for dataset
+struct dataset{
+    dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
+            data(t_data), answers(t_answers){};
+    std::vector<std::vector<double>> data;
+    std::vector<double> answers;
+};
+
+//PATH - path to .csv file, ANS_COUNT - number of values on the output layer
+dataset loadData(std::string PATH, unsigned ANS_COUNT);
 
 //Overload for vector<> printing
 template <typename T>
 std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
     os << '[';
-    for (T val : values){
-        os << val;
-        if (val != values.back()) os << ", ";
+    for (unsigned i = 0; i < values.size(); i++){
+        os << values[i];
+        if (i != values.size() - 1) os << ", ";
     }
     os << ']';
     return os;

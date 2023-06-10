@@ -1,5 +1,52 @@
 #include "NN.h"
 
+dataset loadData(std::string PATH, unsigned ANS_COUNT){
+    std::fstream dataFile(PATH, std::ios::in);
+    
+    std::vector<std::vector<double>> content;
+    std::vector<std::vector<double>> data;
+    std::vector<double> ans;
+
+    if(dataFile.is_open()){
+	    std::vector<double> row;
+    	std::string line;
+
+        //Skip first line if labels
+        if (!isdigit(dataFile.peek())){
+            getline(dataFile, line);
+        }
+        
+        //Parsing through all lines and putting in vector<vector<double>>
+    	while (getline(dataFile, line)){
+            std::istringstream iss(line);
+            std::string token;
+            
+            while (std::getline(iss, token, ',')){   
+                row.push_back(stod(token));
+            }
+
+            content.push_back(row);
+            row.clear();
+        }
+
+        //Separating content --> data, answers
+        for (std::vector<double> dat : content){
+            std::vector<double> buffer;
+            
+            for (unsigned i = 0; i < dat.size() - ANS_COUNT; i++){
+                buffer.push_back(dat[i]);
+            }
+            data.push_back(buffer);
+            buffer.clear();
+
+            ans.push_back(dat[dat.size() - 1]);
+        }
+	} else  
+		std::cout << "Could not open the file\n";
+
+    return dataset(data, ans);
+}
+
 NeuralNetwork::NeuralNetwork(){};
 
 double NeuralNetwork::sigm(double arg) {
@@ -134,7 +181,8 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
 
             //Calculating the derives for output layer
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
-                d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * sigm_deriv(values[network.first - 1][i]);
+                d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * 
+                                                    sigm_deriv(values[network.first - 1][i]);
             }
 
             //Calculating all other derives

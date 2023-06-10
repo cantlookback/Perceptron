@@ -4,9 +4,7 @@
 using namespace std;
 
 int main(){
-    vector<vector<double>> data = {{0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}};
-    vector<double> ans = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
-    vector<double> test;
+    dataset dataset = loadData("C:/Perceptron/library/data/xor.csv", 1);
 
     NeuralNetwork net;
 
@@ -17,9 +15,10 @@ int main(){
 
     net.compile(1, 0.1, 1500);
 
-    net.fit(&data, &ans);
+    net.fit(&dataset.data, &dataset.answers);
 
     while (true){
+        vector<double> test;
 
         double a, b;
         std::cout << "Input a b >>";
@@ -29,7 +28,6 @@ int main(){
         net.feedForward(&test);
 
         net.output();
-    
     }
 
     return 0;
