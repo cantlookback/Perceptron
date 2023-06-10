@@ -8,6 +8,8 @@ int main(){
 
     NeuralNetwork net;
 
+    //Adadadadadadada
+
     net.addLayer(2);
     net.addLayer(3);
     net.addLayer(3);
