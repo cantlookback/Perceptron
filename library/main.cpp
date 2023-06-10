@@ -4,9 +4,29 @@
 using namespace std;
 
 int main(){
-    vector<vector<double>> data = {{0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}, {0, 0}, {0, 1}, {1, 1}, {1, 0}};
-    vector<double> ans = {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1};
-    vector<double> test;
+    vector<vector<double>> dataset = loadData("C:/Perceptron/library/data/xor.csv");
+    //tuples by 3 {0, 0, 0}, {0, 1, 1} e.t.c
+
+    //need to make tuples like {0, 0}, {0, 1} 
+    //                          {0}    , {1}
+    vector<vector<double>> data;
+    vector<double> ans;
+    
+    unsigned ANS_COUNT = 1;
+
+    //Separating dataset --> data and answers
+    for (vector<double> dat : dataset){
+        vector<double> buffer;
+        
+        for (unsigned i = 0; i < dat.size() - ANS_COUNT; i++){
+            buffer.push_back(dat[i]);
+        }
+        
+        data.push_back(buffer);
+        buffer.clear();
+
+        ans.push_back(dat[dat.size() - 1]);
+    }
 
     NeuralNetwork net;
 
@@ -20,6 +40,7 @@ int main(){
     net.fit(&data, &ans);
 
     while (true){
+        vector<double> test;
 
         double a, b;
         std::cout << "Input a b >>";
@@ -29,7 +50,6 @@ int main(){
         net.feedForward(&test);
 
         net.output();
-    
     }
 
     return 0;

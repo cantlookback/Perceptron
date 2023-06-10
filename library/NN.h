@@ -3,14 +3,18 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+
+std::vector<std::vector<double>> loadData(std::string PATH);
 
 //Overload for vector<> printing
 template <typename T>
 std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
     os << '[';
-    for (T val : values){
-        os << val;
-        if (val != values.back()) os << ", ";
+    for (unsigned i = 0; i < values.size(); i++){
+        os << values[i];
+        if (i != values.size() - 1) os << ", ";
     }
     os << ']';
     return os;

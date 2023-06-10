@@ -1,5 +1,36 @@
 #include "NN.h"
 
+std::vector<std::vector<double>> loadData(std::string PATH){
+    std::fstream dataFile(PATH, std::ios::in);
+    std::vector<std::vector<double>> content;
+
+    if(dataFile.is_open()){
+	    std::vector<double> row;
+    	std::string line;
+
+        //Skip first line if labels
+        if (!isdigit(dataFile.peek())){
+            getline(dataFile, line);
+        }
+        
+        //Parsing through all lines and putting in vector<vector<double>>
+    	while (getline(dataFile, line)){
+            std::istringstream iss(line);
+            std::string token;
+            
+            while (std::getline(iss, token, ',')){   
+                row.push_back(stod(token));
+            }
+
+            content.push_back(row);
+            row.clear();
+        }
+	} else  
+		std::cout << "Could not open the file\n";
+
+    return content;
+}
+
 NeuralNetwork::NeuralNetwork(){};
 
 double NeuralNetwork::sigm(double arg) {
