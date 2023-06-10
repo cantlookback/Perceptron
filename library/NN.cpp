@@ -1,8 +1,11 @@
 #include "NN.h"
 
-std::vector<std::vector<double>> loadData(std::string PATH){
+dataset loadData(std::string PATH, unsigned ANS_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
+    
     std::vector<std::vector<double>> content;
+    std::vector<std::vector<double>> data;
+    std::vector<double> ans;
 
     if(dataFile.is_open()){
 	    std::vector<double> row;
@@ -25,10 +28,23 @@ std::vector<std::vector<double>> loadData(std::string PATH){
             content.push_back(row);
             row.clear();
         }
+
+        //Separating content --> data, answers
+        for (std::vector<double> dat : content){
+            std::vector<double> buffer;
+            
+            for (unsigned i = 0; i < dat.size() - ANS_COUNT; i++){
+                buffer.push_back(dat[i]);
+            }
+            data.push_back(buffer);
+            buffer.clear();
+
+            ans.push_back(dat[dat.size() - 1]);
+        }
 	} else  
 		std::cout << "Could not open the file\n";
 
-    return content;
+    return dataset(data, ans);
 }
 
 NeuralNetwork::NeuralNetwork(){};
@@ -165,7 +181,8 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
 
             //Calculating the derives for output layer
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
-                d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * sigm_deriv(values[network.first - 1][i]);
+                d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * 
+                                                    sigm_deriv(values[network.first - 1][i]);
             }
 
             //Calculating all other derives
