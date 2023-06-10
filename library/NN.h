@@ -6,7 +6,14 @@
 #include <fstream>
 #include <sstream>
 
-std::vector<std::vector<double>> loadData(std::string PATH);
+struct dataset{
+    dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
+            data(t_data), answers(t_answers){};
+    std::vector<std::vector<double>> data;
+    std::vector<double> answers;
+};
+
+dataset loadData(std::string PATH, unsigned ANS_COUNT);
 
 //Overload for vector<> printing
 template <typename T>
