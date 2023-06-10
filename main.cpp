@@ -8,6 +8,8 @@ int main(){
 
     NeuralNetwork net;
 
+    //Adadadadadadada
+
     //Adding some serious shit
     //To test how merging works
     //Perererererere
