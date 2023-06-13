@@ -6,6 +6,13 @@
 #include <fstream>
 #include <sstream>
 
+enum activeFunction{
+    SIGMOID = 1,
+    RELU,
+    TANH,
+    SOFTMAX,
+};
+
 //Custom structure for dataset
 struct dataset{
     dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
@@ -34,7 +41,7 @@ public:
     NeuralNetwork();
 
     //Adding layer in NN
-    void addLayer(unsigned neurons);
+    void addLayer(unsigned neurons, activeFunction activeFunc);
 
     //Setting additional parameters for Network
     void compile(uint64_t trainRate_t, uint64_t alpha_t, uint64_t epochs);
@@ -65,7 +72,7 @@ private:
     double MSE(double Ytrue);
 
     //* Layers, neurons
-    std::pair<int, std::vector<int>> network = {0, {}};
+    std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {{}}};
     //* Weights of axons
     std::vector<std::vector<double>> weights;
     //* Values of neurons in each layer

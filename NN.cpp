@@ -65,14 +65,14 @@ void NeuralNetwork::setWeights() {
     }
 }
 
-void NeuralNetwork::addLayer(unsigned neurons){
+void NeuralNetwork::addLayer(unsigned neurons, activeFunction activeFunc){
     if (neurons <= 0){
         std::cout << "Cannot add layer with <1 neurons\n";
         return;
     }
 
     network.first++;
-    network.second.push_back(neurons);
+    network.second.push_back({neurons, activeFunc});
 }
 
 void NeuralNetwork::output(){
@@ -90,11 +90,11 @@ void NeuralNetwork::compile(uint64_t trainRate_t, uint64_t alpha_t, uint64_t epo
     values.resize(network.first);
 
     for (unsigned i = 0; i <= weights.size(); i++) {
-        values[i].resize(network.second[i]);
+        values[i].resize(network.second[i].first);
     }
 
     for (int i = 0; i < network.first - 1; i++) {
-        weights[i].resize(network.second[i] * network.second[i + 1]);
+        weights[i].resize(network.second[i].first * network.second[i + 1].first);
     }
 
     trainRate = trainRate_t;
@@ -107,7 +107,7 @@ void NeuralNetwork::compile(uint64_t trainRate_t, uint64_t alpha_t, uint64_t epo
 
 void NeuralNetwork::print(){
     for (auto neur : network.second){
-        for (int i = 0; i < neur; i++){
+        for (int i = 0; i < neur.first; i++){
             std::cout << "O  ";
         }
         std::cout << "\n-----------\n";
@@ -132,9 +132,9 @@ void NeuralNetwork::feedForward(std::vector<double>* data) {
     //!Then using activation function on our value
 
     for (int i = 1; i < network.first; i++) {
-        for (int j = 0; j < network.second[i]; j++) {
-            for (int k = 0; k < network.second[i - 1]; k++) {
-                values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i] + j];
+        for (int j = 0; j < network.second[i].first; j++) {
+            for (int k = 0; k < network.second[i - 1].first; k++) {
+                values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
             }
             values[i][j] = sigm(values[i][j]);
         }
@@ -164,10 +164,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
     dW.resize(weights.size());
 
     for (unsigned i = 0; i < d_X.size(); i++) {
-        d_X[i].resize(network.second[i]);
+        d_X[i].resize(network.second[i].first);
     }
     for (int i = 0; i < network.first - 1; i++) {
-        GRADs[i].resize(network.second[i] * network.second[i + 1]);
+        GRADs[i].resize(network.second[i].first * network.second[i + 1].first);
     }
     for (int i = 0; i < dW.size(); i++){
         dW[i].resize(weights[i].size());
@@ -189,7 +189,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
             for (int i = network.first - 2; i >= 0; i--) {
                 for (unsigned j = 0; j < d_X[i].size(); j++) {
                     for (unsigned k = 0; k < d_X[i + 1].size(); k++) {
-                        d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1] - 1) + j];
+                        d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1].first - 1) + j];
                     }
                     d_X[i][j] *= sigm_deriv(values[i][j]);
                 }

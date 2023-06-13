@@ -8,12 +8,12 @@ int main(){
 
     NeuralNetwork net;
 
-    net.addLayer(2);
-    net.addLayer(3);
-    net.addLayer(3);
-    net.addLayer(1);
+    net.addLayer(2, SIGMOID);
+    net.addLayer(3, SIGMOID);
+    net.addLayer(3, SIGMOID);
+    net.addLayer(1, SIGMOID);
 
-    net.compile(1, 0.1, 1500);
+    net.compile(1, 0.1, 100);
 
     net.fit(&dataset.data, &dataset.answers);
 
