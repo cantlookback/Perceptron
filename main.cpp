@@ -13,7 +13,7 @@ int main(){
     net.addLayer(3, SIGMOID);
     net.addLayer(1, SIGMOID);
 
-    net.compile(1, 0.1, 100);
+    net.compile(1, 0.1, 500);
 
     net.fit(&dataset.data, &dataset.answers);
 
