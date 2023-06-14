@@ -52,16 +52,18 @@ NeuralNetwork::NeuralNetwork(){};
 double NeuralNetwork::actFunc(double arg, activeFunction f){
     switch (f){
         case SIGMOID:
-            return 1 / (1 + exp(-arg));
+            return 1 / (1 + expl(-arg));
         break;
         case RELU:
-
+            return arg < 0 ? 0 : arg;
         break;
         case TANH:
-            return (exp(arg) - exp(-arg)) / (exp(arg) + exp(-arg));
+            //? Workaround, because when arg is > 11356 expl(x) turns to NaN
+            //? Need to find a better solution?
+            return arg > 10000 ? 1 : (expl(arg) - expl(-arg)) / (expl(arg) + expl(-arg));
         break;
         case SOFTMAX:
-
+            //TODO: WIP
         break;
     }
     return 0;
@@ -73,13 +75,13 @@ double NeuralNetwork::func_deriv(double arg, activeFunction f){
             return arg * (1 - arg);
         break;
         case RELU:
-
+            return arg < 0 ? 0 : 1;
         break;
         case TANH:
             return 1 - pow(arg, 2);
         break;
         case SOFTMAX:
-
+            //TODO: WIP
         break;
     }
     return 0;
@@ -164,7 +166,7 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
             for (int k = 0; k < network.second[i - 1].first; k++) {
                 values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
             }
-            values[i][j] = actFunc(values[i][j], SIGMOID);
+            values[i][j] = actFunc(values[i][j], network.second[i].second);
         }
     }
 }
@@ -212,7 +214,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
             //Calculating the derives for output layer
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
                 d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * 
-                                                    func_deriv(values[network.first - 1][i], SIGMOID);
+                        func_deriv(values[network.first - 1][i], network.second[network.first - 1].second);
             }
 
             //Calculating all other derives
@@ -221,7 +223,8 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
                     for (unsigned k = 0; k < d_X[i + 1].size(); k++) {
                         d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1].first - 1) + j];
                     }
-                    d_X[i][j] *= func_deriv(values[i][j], SIGMOID);
+                    d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
+
                 }
             }
 
