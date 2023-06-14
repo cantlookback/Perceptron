@@ -6,6 +6,13 @@
 #include <fstream>
 #include <sstream>
 
+enum activeFunction{
+    SIGMOID = 1,
+    RELU,
+    TANH,
+    SOFTMAX,
+};
+
 //Custom structure for dataset
 struct dataset{
     dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
@@ -34,7 +41,7 @@ public:
     NeuralNetwork();
 
     //Adding layer in NN
-    void addLayer(unsigned neurons);
+    void addLayer(unsigned neurons, activeFunction activeFunc);
 
     //Setting additional parameters for Network
     void compile(double trainRate_t, double alpha_t, double epochs);
@@ -52,11 +59,12 @@ public:
     void feedForward(std::vector<double> *data);
 
 private:
-    //Activation funcion
-    double sigm(double arg);
 
-    //Derivative of sigm
-    double sigm_deriv(double arg);
+    //Switch of Activation Funcions
+    double actFunc(double arg, activeFunction f);
+
+    //Derivatives of Activation Functions
+    double func_deriv(double arg, activeFunction f);
 
     //Setting random base weights
     void setWeights();
@@ -64,9 +72,9 @@ private:
     //Mean Square Error
     double MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred);
 
-    //* Layers, neurons
-    std::pair<int, std::vector<int>> network = {0, {}};
-    //* Weights of axons
+    //* {num of Layers, {neurons on layer, layer activ_function}}
+    std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
+    //* Weights of axons || Values of neurons in each layer
     std::vector<std::vector<double>> weights, values;
     double trainRate = 1, alpha = 1, epochs = 500;
 };
