@@ -143,7 +143,7 @@ void NeuralNetwork::print(){
     std::cout << "TrainRate = " << trainRate << "\nAlpha = " << alpha << '\n';
 }
 
-void NeuralNetwork::feedForward(std::vector<double>* data) {
+void NeuralNetwork::feedForward(std::vector<double> *data) {
     //Copy data to input layer
     for (int i = 0; i < values.size(); i++){
         for (int j = 0; j < values[i].size(); j++){
@@ -169,17 +169,16 @@ void NeuralNetwork::feedForward(std::vector<double>* data) {
     }
 }
 
-
-//TODO Wrong, need to redo.
-double NeuralNetwork::MSE(double Ytrue) {
+double NeuralNetwork::MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred) {
     double mse = 0;
-    double Ypred = values[network.first - 1][0];
-    mse += pow(Ytrue - Ypred, 2);
-    mse /= 1;
+    for (unsigned i = 0; i < Ytrue->size(); i++){
+        mse += pow((*Ytrue)[i] - (*Ypred)[i], 2);
+    }
+    mse /= Ytrue->size();
     return mse;
 }
 
-void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<double>* answers) {
+void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<double> *answers) {
     std::cout << '\n';
     //*d_X | Cleans after every iteration
     std::vector<std::vector<double>> d_X;
@@ -203,6 +202,8 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
     }
 
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
+        //Vector for MSE
+        std::vector<double> Ypred;
 
         for (unsigned set = 0; set < data->size(); set++) {
             //Feeding data to the net
@@ -256,8 +257,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
                     GRADs[i][j] = 0;
                 }
             }
-            std::cout << '\r' << epoc << " Epoch, MSE = " << MSE((*answers)[set]) << std::flush;
+            Ypred.push_back(values[network.first - 1][0]);
         }
+        std::cout << '\r' << epoc << " Epoch, MSE = " << MSE(answers, &Ypred) << std::flush;
+        Ypred.clear();
     }
     std::cout << '\n';
 }

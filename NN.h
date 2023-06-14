@@ -53,10 +53,10 @@ public:
     void output();
 
     //Train
-    void fit(std::vector<std::vector<double>>* data, std::vector<double>* answers);
+    void fit(std::vector<std::vector<double>> *data, std::vector<double> *answers);
 
     //Running...
-    void feedForward(std::vector<double>* data);
+    void feedForward(std::vector<double> *data);
 
 private:
 
@@ -70,7 +70,7 @@ private:
     void setWeights();
 
     //Mean Square Error
-    double MSE(double Ytrue);
+    double MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred);
 
     //* {num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
