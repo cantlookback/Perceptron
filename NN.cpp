@@ -49,12 +49,40 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT){
 
 NeuralNetwork::NeuralNetwork(){};
 
-double NeuralNetwork::sigm(double arg) {
-    return 1 / (1 + exp(-arg));
+double NeuralNetwork::actFunc(double arg, activeFunction f){
+    switch (f){
+        case SIGMOID:
+            return 1 / (1 + exp(-arg));
+        break;
+        case RELU:
+
+        break;
+        case TANH:
+            return (exp(arg) - exp(-arg)) / (exp(arg) + exp(-arg));
+        break;
+        case SOFTMAX:
+
+        break;
+    }
+    return 0;
 }
 
-double NeuralNetwork::sigm_deriv(double arg) {
-    return arg * (1 - arg);
+double NeuralNetwork::func_deriv(double arg, activeFunction f){
+    switch (f){
+        case SIGMOID:
+            return arg * (1 - arg);
+        break;
+        case RELU:
+
+        break;
+        case TANH:
+            return 1 - pow(arg, 2);
+        break;
+        case SOFTMAX:
+
+        break;
+    }
+    return 0;
 }
 
 void NeuralNetwork::setWeights() {
@@ -136,15 +164,16 @@ void NeuralNetwork::feedForward(std::vector<double>* data) {
             for (int k = 0; k < network.second[i - 1].first; k++) {
                 values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
             }
-            values[i][j] = sigm(values[i][j]);
+            values[i][j] = actFunc(values[i][j], SIGMOID);
         }
     }
 }
 
+
+//TODO Wrong, need to redo.
 double NeuralNetwork::MSE(double Ytrue) {
     double mse = 0;
-    double Ypred;
-    Ypred = values[network.first - 1][0];
+    double Ypred = values[network.first - 1][0];
     mse += pow(Ytrue - Ypred, 2);
     mse /= 1;
     return mse;
@@ -182,7 +211,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
             //Calculating the derives for output layer
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
                 d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * 
-                                                    sigm_deriv(values[network.first - 1][i]);
+                                                    func_deriv(values[network.first - 1][i], SIGMOID);
             }
 
             //Calculating all other derives
@@ -191,7 +220,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>* data, std::vector<doub
                     for (unsigned k = 0; k < d_X[i + 1].size(); k++) {
                         d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1].first - 1) + j];
                     }
-                    d_X[i][j] *= sigm_deriv(values[i][j]);
+                    d_X[i][j] *= func_deriv(values[i][j], SIGMOID);
                 }
             }
 

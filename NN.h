@@ -59,11 +59,12 @@ public:
     void feedForward(std::vector<double>* data);
 
 private:
-    //Activation funcion
-    double sigm(double arg);
 
-    //Derivative of sigm
-    double sigm_deriv(double arg);
+    //Switch of Activation Funcions
+    double actFunc(double arg, activeFunction f);
+
+    //Derivatives of Activation Functions
+    double func_deriv(double arg, activeFunction f);
 
     //Setting random base weights
     void setWeights();
@@ -71,7 +72,7 @@ private:
     //Mean Square Error
     double MSE(double Ytrue);
 
-    //* Layers, neurons
+    //* {num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
     //* Weights of axons
     std::vector<std::vector<double>> weights;
