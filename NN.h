@@ -74,12 +74,9 @@ private:
 
     //* {num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
-    //* Weights of axons
-    std::vector<std::vector<double>> weights;
-    //* Values of neurons in each layer
-    std::vector<std::vector<double>> values;
-    double trainRate = 1, alpha = 1;
-    double epochs = 500;
+    //* Weights of axons || Values of neurons in each layer
+    std::vector<std::vector<double>> weights, values;
+    double trainRate = 1, alpha = 1, epochs = 500;
 };
 
 #endif
