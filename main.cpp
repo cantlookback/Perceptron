@@ -13,7 +13,7 @@ int main(){
     net.addLayer(3);
     net.addLayer(1);
 
-    net.compile(1, 0.1, 1500);
+    net.compile(1, 0.1, 350);
 
     net.fit(&dataset.data, &dataset.answers);
 

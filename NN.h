@@ -46,10 +46,10 @@ public:
     void output();
 
     //Train
-    void fit(std::vector<std::vector<double>>* data, std::vector<double>* answers);
+    void fit(std::vector<std::vector<double>> *data, std::vector<double> *answers);
 
     //Running...
-    void feedForward(std::vector<double>* data);
+    void feedForward(std::vector<double> *data);
 
 private:
     //Activation funcion
@@ -62,16 +62,13 @@ private:
     void setWeights();
 
     //Mean Square Error
-    double MSE(double Ytrue);
+    double MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred);
 
     //* Layers, neurons
     std::pair<int, std::vector<int>> network = {0, {}};
     //* Weights of axons
-    std::vector<std::vector<double>> weights;
-    //* Values of neurons in each layer
-    std::vector<std::vector<double>> values;
-    double trainRate = 1, alpha = 1;
-    double epochs = 500;
+    std::vector<std::vector<double>> weights, values;
+    double trainRate = 1, alpha = 1, epochs = 500;
 };
 
 #endif
