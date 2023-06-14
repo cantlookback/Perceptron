@@ -108,7 +108,7 @@ void NeuralNetwork::output(){
     return;
 }
 
-void NeuralNetwork::compile(uint64_t trainRate_t, uint64_t alpha_t, uint64_t epochs_t){
+void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t){
     if(network.first < 2){
         std::cout << "Cannot compile model, less than 2 layers\n";
         return;
