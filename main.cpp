@@ -13,17 +13,17 @@ int main(){
     net.addLayer(3, SIGMOID);
     net.addLayer(1, SIGMOID);
 
-    net.compile(1, 0.1, 500);
+    net.compile(1, 0.1, 5000, 1);
 
     net.fit(&dataset.data, &dataset.answers);
-
+    //net.print();
     while (true){
-        vector<double> test;
+        vector<double> test = {0,0};
 
-        double a, b;
-        std::cout << "Input a b >>";
-        std::cin >> a >> b;
-        test = {a, b};
+        std::cout << "Input >>";
+        for (unsigned i = 0; i < 2; i++){
+        std::cin >> test[i];
+        }
 
         net.feedForward(&test);
 
