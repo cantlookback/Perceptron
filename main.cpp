@@ -18,12 +18,15 @@ int main(){
     net.fit(&dataset.data, &dataset.answers);
     //net.print();
     while (true){
-        vector<double> test = {0,0};
+        vector<double> test;
 
         std::cout << "Input >>";
         for (unsigned i = 0; i < 2; i++){
-        std::cin >> test[i];
+            int x;
+            std::cin >> x;
+            test.push_back(x);
         }
+        test.clear();
 
         net.feedForward(&test);
 
