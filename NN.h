@@ -58,6 +58,9 @@ public:
     //Running...
     void feedForward(std::vector<double> *data);
 
+    //Getting output value
+    double getOut();
+
 private:
 
     //Switch of Activation Funcions

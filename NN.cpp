@@ -110,6 +110,10 @@ void NeuralNetwork::output(){
     return;
 }
 
+double NeuralNetwork::getOut(){
+    return values[network.first - 1][0];
+}
+
 void NeuralNetwork::print(){
     for (auto layer : network.second){
         for (int i = 0; i < layer.first; i++){
