@@ -44,7 +44,7 @@ public:
     void addLayer(unsigned neurons, activeFunction activeFunc);
 
     //Setting additional parameters for Network
-    void compile(double trainRate_t, double alpha_t, double epochs);
+    void compile(double trainRate_t, double alpha_t, double epochs, bool bias);
 
     //View a model
     void print();
@@ -77,6 +77,7 @@ private:
     //* Weights of axons || Values of neurons in each layer
     std::vector<std::vector<double>> weights, values;
     double trainRate = 1, alpha = 1, epochs = 500;
+    bool bias = 0;
 };
 
 #endif
