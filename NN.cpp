@@ -110,40 +110,50 @@ void NeuralNetwork::output(){
     return;
 }
 
-void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t){
+void NeuralNetwork::print(){
+    for (auto layer : network.second){
+        for (int i = 0; i < layer.first; i++){
+            std::cout << "O  ";
+        }
+        std::cout << "\n-----------\n";
+    }
+
+    for (auto x : weights){
+        for (auto y : x){
+            std::cout << (y == y) << " ";
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "TrainRate = " << trainRate << "\nAlpha = " << alpha << '\n';
+}
+
+void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t){
     if(network.first < 2){
         std::cout << "Cannot compile model, less than 2 layers\n";
         return;
     }
 
-    weights.resize(network.first - 1);
-    values.resize(network.first);
-
-    for (unsigned i = 0; i <= weights.size(); i++) {
-        values[i].resize(network.second[i].first);
-    }
-
-    for (int i = 0; i < network.first - 1; i++) {
-        weights[i].resize(network.second[i].first * network.second[i + 1].first);
-    }
-
     trainRate = trainRate_t;
     alpha = alpha_t;
     epochs = epochs_t;
+    bias = bias_t;
+
+    weights.resize(network.first - 1);
+    for (int i = 0; i < network.first - 1; i++) {
+        weights[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
+        //std::cout << "Weight " << i << " size === " << weights[i].size() << '\n';
+    }
+    
+    values.resize(network.first);
+    for (unsigned i = 0; i <= weights.size(); i++) {
+        values[i].resize(network.second[i].first);
+    }
 
     this->setWeights();
     std::cout << "Compiling is done!\n";
 }
 
-void NeuralNetwork::print(){
-    for (auto neur : network.second){
-        for (int i = 0; i < neur.first; i++){
-            std::cout << "O  ";
-        }
-        std::cout << "\n-----------\n";
-    }
-    std::cout << "TrainRate = " << trainRate << "\nAlpha = " << alpha << '\n';
-}
 
 void NeuralNetwork::feedForward(std::vector<double> *data) {
     //Copy data to input layer
@@ -155,17 +165,20 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
 
     values[0] = *data;
 
-    //!For each layer, starting with i = 1
-    //!For each neuron from the i layer and beyond
-    //!For each neuron from i-1 layer
-    //!Value of current neuron = SUM of previous layer neurons * appropriate weight
-    //!Then using activation function on our value
+    //! For each layer, starting with i = 1
+    //! For each neuron from the i layer and after
+    //! For each neuron from i-1 layer
+    //! Value of current neuron = SUM of previous layer neurons * appropriate weight
+    //! Then using activation function on our value
 
-    for (int i = 1; i < network.first; i++) {
-        for (int j = 0; j < network.second[i].first; j++) {
-            for (int k = 0; k < network.second[i - 1].first; k++) {
+    for (unsigned i = 1; i < network.first; i++) {
+        for (unsigned j = 0; j < network.second[i].first; j++) {
+            for (unsigned k = 0; k < network.second[i - 1].first; k++) {
                 values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
+                //std::cout << "v[" << i - 1 << "][" << k << "] * w[" << i - 1 << "][" << k * network.second[i].first + j << "]" << '\n';
             }
+            if (bias) values[i][j] += 1 * weights[i - 1][weights[i - 1].size() - network.second[i].first + j];
+            //std::cout << 1 << " * w[" << i - 1 << "][" << weights[i - 1].size() - network.second[i].first + j << "]" << '\n';
             values[i][j] = actFunc(values[i][j], network.second[i].second);
         }
     }
@@ -197,11 +210,25 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
         d_X[i].resize(network.second[i].first);
     }
     for (int i = 0; i < network.first - 1; i++) {
-        GRADs[i].resize(network.second[i].first * network.second[i + 1].first);
+        GRADs[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
     }
     for (int i = 0; i < dW.size(); i++){
         dW[i].resize(weights[i].size());
     }
+/*
+    std::cout << "---d_X sizes---\n";
+    for (auto dx : d_X){
+        std::cout << "[" << dx.size() << "]" << '\n';
+    }
+    std::cout << "---GRADs sizes---\n";
+    for (auto dx : GRADs){
+        std::cout << "[" << dx.size() << "]" << '\n';
+    }
+    std::cout << "---dW sizes---\n";
+    for (auto dx : dW){
+        std::cout << "[" << dx.size() << "]" << '\n';
+    }
+*/
 
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
         //Vector for MSE
@@ -235,7 +262,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
                 }
             }
 
-            //Calculating dW
+            //Calculating dW    
             for (unsigned i = 0; i < dW.size(); i++){
                 for (int j = 0; j < dW[i].size(); j++){
                     dW[i][j] = trainRate * GRADs[i][j] + alpha * dW[i][j];
@@ -265,5 +292,5 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
         std::cout << '\r' << epoc << " Epoch, MSE = " << MSE(answers, &Ypred) << std::flush;
         Ypred.clear();
     }
-    std::cout << '\n';
+    std::cout << "Done!" << '\n';
 }
