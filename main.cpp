@@ -6,7 +6,7 @@ using namespace std;
 int main(){
     dataset train = loadData("C:/Perceptron/data/IrisTrain.csv", 1);
 
-    unsigned INPUT_SIZE = 4;
+    unsigned INPUT_SIZE = train.data.size();
 
     NeuralNetwork net;
 
@@ -25,10 +25,14 @@ int main(){
 
     for (unsigned i = 0; i < test.data.size(); i++){
         std::cout << "Row " << i << " testing..." << '\n';
+
         net.feedForward(&(test.data[i]));
+
         std::cout << net.getOut() << '\n';
-        std::cout << "True value --> [" << test.answers[i] << "]    "; 
+        std::cout << "True value --> [" << test.answers[i] << "]    ";
+
         if (round(net.getOut()) == test.answers[i]) std::cout << "YES";
+
         std::cout << '\n';
     }
 
