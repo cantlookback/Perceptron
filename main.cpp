@@ -5,6 +5,7 @@ using namespace std;
 
 int main(){
     dataset train = loadData("C:/Perceptron/data/IrisTrain.csv", 1);
+    //Iris -- 0.7, 0.1, 1000, 1 || [4, 8, 4, 1]
 
     unsigned INPUT_SIZE = train.data.size();
 
@@ -15,7 +16,7 @@ int main(){
     net.addLayer(4, SIGMOID);
     net.addLayer(1, SIGMOID);
 
-    net.compile(0.7, 0.1, 5000, 1);
+    net.compile(0.7, 0.1, 1000, 1);
 
     net.fit(&train.data, &train.answers);
 
