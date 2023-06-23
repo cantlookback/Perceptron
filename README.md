@@ -15,7 +15,7 @@
     * XOR
     * Diabetes
 
-To build .exe file use
+To build .exe file through GNU use
 
     g++.exe -g main.cpp NN.cpp -o main.exe
 
