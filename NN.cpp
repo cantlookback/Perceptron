@@ -58,9 +58,7 @@ double NeuralNetwork::actFunc(double arg, activeFunction f){
             return arg < 0 ? 0 : arg;
         break;
         case TANH:
-            //? Workaround, because when arg is > 11356 expl(x) turns to NaN
-            //? Need to find a better solution?
-            return arg > 10000 ? 1 : (expl(arg) - expl(-arg)) / (expl(arg) + expl(-arg));
+            return tanh(arg);
         break;
         case SOFTMAX:
             //TODO: WIP
