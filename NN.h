@@ -59,7 +59,7 @@ public:
     void feedForward(std::vector<double> *data);
 
     //Getting output value
-    double getOut();
+    std::vector<double>* getOut();
 
 private:
 
