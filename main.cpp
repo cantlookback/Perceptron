@@ -14,14 +14,20 @@ int main(){
     net.addLayer(INPUT_SIZE, SIGMOID);
     net.addLayer(8, SIGMOID);
     net.addLayer(4, SIGMOID);
-    net.addLayer(1, SIGMOID);
-
+    net.addLayer(3, SOFTMAX);
+ 
     net.compile(0.7, 0.1, 1000, 1);
-
     net.fit(&train.data, &train.answers);
+
+    //vector<double> dat = {12, 12, 12, 21};
+    //net.feedForward(&dat);
+
+
+    //cout << *net.getOut();
 
 
     //? DATA TEST MODULE
+    /*
     dataset test = loadData("C:/Perceptron/data/IrisTest.csv", 1);
 
     for (unsigned i = 0; i < test.data.size(); i++){
@@ -36,7 +42,7 @@ int main(){
 
         std::cout << '\n';
     }
-
+    */
 
     // vector<double> test;
     // test.resize(INPUT_SIZE);
