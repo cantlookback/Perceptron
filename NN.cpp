@@ -47,6 +47,17 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT){
     return dataset(data, ans);
 }
 
+template <typename T>
+std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
+    os << '[';
+    for (unsigned i = 0; i < values.size(); i++){
+        os << values[i];
+        if (i != values.size() - 1) os << ", ";
+    }
+    os << ']';
+    return os;
+}
+
 NeuralNetwork::NeuralNetwork(){};
 
 double NeuralNetwork::actFunc(double arg, activeFunction f){
@@ -79,7 +90,7 @@ double NeuralNetwork::func_deriv(double arg, activeFunction f){
             return 1 - pow(arg, 2);
         break;
         case SOFTMAX:
-            //TODO: WIP
+            return arg * (1 - arg);
         break;
     }
     return 0;
