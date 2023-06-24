@@ -1,11 +1,12 @@
-#ifndef NN_H
-#define NN_H
+#ifndef NN_H_
+#define NN_H_
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <fstream>
 #include <sstream>
 
+//Enum for Activation Functions enumeration
 enum activeFunction{
     SIGMOID = 1,
     RELU,
@@ -26,15 +27,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT);
 
 //Overload for vector<> printing
 template <typename T>
-std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
-    os << '[';
-    for (unsigned i = 0; i < values.size(); i++){
-        os << values[i];
-        if (i != values.size() - 1) os << ", ";
-    }
-    os << ']';
-    return os;
-}
+std::ostream& operator<<(std::ostream &os, std::vector<T> &values);
 
 class NeuralNetwork{
 public:
@@ -75,12 +68,12 @@ private:
     //Mean Square Error
     double MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred);
 
-    //* {num of Layers, {neurons on layer, layer activ_function}}
+    //*{num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
-    //* Weights of axons || Values of neurons in each layer
+    //*Weights of axons || Values of neurons in each layer
     std::vector<std::vector<double>> weights, values;
     double trainRate = 1, alpha = 1, epochs = 500;
     bool bias = 0;
 };
 
-#endif
+#endif //NN_H_
