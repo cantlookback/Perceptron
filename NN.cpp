@@ -108,8 +108,8 @@ void NeuralNetwork::output(){
     return;
 }
 
-double NeuralNetwork::getOut(){
-    return values[network.first - 1][0];
+std::vector<double>* NeuralNetwork::getOut(){
+    return &values[network.first - 1];
 }
 
 void NeuralNetwork::print(){
@@ -173,16 +173,30 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
     //! Value of current neuron = SUM of previous layer neurons * appropriate weight
     //! Then using activation function on our value
 
-    for (unsigned i = 1; i < network.first; i++) {
-        for (unsigned j = 0; j < network.second[i].first; j++) {
-            for (unsigned k = 0; k < network.second[i - 1].first; k++) {
+    for (unsigned i = 1; i < network.first; i++) {        //Layers
+        for (unsigned j = 0; j < network.second[i].first; j++) {        //Neurons on i layer
+            for (unsigned k = 0; k < network.second[i - 1].first; k++) {        //Neurons on i - 1 layer
                 values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
                 //std::cout << "v[" << i - 1 << "][" << k << "] * w[" << i - 1 << "][" << k * network.second[i].first + j << "]" << '\n';
             }
             if (bias) values[i][j] += 1 * weights[i - 1][weights[i - 1].size() - network.second[i].first + j];
             //std::cout << 1 << " * w[" << i - 1 << "][" << weights[i - 1].size() - network.second[i].first + j << "]" << '\n';
-            values[i][j] = actFunc(values[i][j], network.second[i].second);
+            if (network.second[i].second != SOFTMAX){
+                values[i][j] = actFunc(values[i][j], network.second[i].second);
+            }
         }
+    }
+
+    if (network.second[network.first - 1].second == SOFTMAX){
+        std::vector<double> out;
+        for (unsigned i = 0; i < network.second[network.first - 1].first; i++){
+            double sum = 0;
+            for (unsigned j = 0; j < network.second[network.first - 1].first; j++){
+                sum += expl(values[network.first - 1][j]);
+            }
+            out.push_back(expl(values[network.first - 1][i]) / sum);
+        }
+        values[network.first - 1] = out;
     }
 }
 
