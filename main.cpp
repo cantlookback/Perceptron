@@ -14,9 +14,10 @@ int main(){
     net.addLayer(INPUT_SIZE, SIGMOID);
     net.addLayer(8, SIGMOID);
     net.addLayer(4, SIGMOID);
-    net.addLayer(3, SOFTMAX);
- 
-    net.compile(0.7, 0.1, 1000, 1);
+    net.addLayer(1, SIGMOID);
+
+    net.compile(0.7, 0.1, 1000, 1, MSE);
+
     net.fit(&train.data, &train.answers);
 
     //vector<double> dat = {12, 12, 12, 21};
