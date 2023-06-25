@@ -21,14 +21,14 @@ enum activeFunction{
 
 //Custom structure for dataset
 struct dataset{
-    dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
+    dataset(std::vector<std::vector<double>> t_data, std::vector<std::vector<double>> t_answers) : 
             data(t_data), answers(t_answers){};
     std::vector<std::vector<double>> data;
-    std::vector<double> answers;
+    std::vector<std::vector<double>> answers;
 };
 
 //PATH - path to .csv file, ANS_COUNT - number of values on the output layer
-dataset loadData(std::string PATH, unsigned ANS_COUNT);
+dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT);
 
 //Overload for vector<> printing
 template <typename T>
@@ -51,7 +51,7 @@ public:
     void output();
 
     //Train
-    void fit(std::vector<std::vector<double>> *data, std::vector<double> *answers);
+    void fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers);
 
     //Running...
     void feedForward(std::vector<double> *data);
@@ -71,7 +71,7 @@ private:
     void setWeights();
 
     //Loss Functions switch
-    double lossFunc(std::vector<double> *Ytrue, std::vector<double> *Ypred);
+    double lossFunc(std::vector<std::vector<double>> *Ytrue, std::vector<std::vector<double>> *Ypred);
 
     //*{num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};

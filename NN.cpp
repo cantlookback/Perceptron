@@ -1,11 +1,11 @@
 #include "NN.h"
 
-dataset loadData(std::string PATH, unsigned ANS_COUNT){
+dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
 
     std::vector<std::vector<double>> content;
     std::vector<std::vector<double>> data;
-    std::vector<double> ans;
+    std::vector<std::vector<double>> ans;
 
     if(dataFile.is_open()){
 	    std::vector<double> row;
@@ -38,11 +38,18 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT){
             }
             data.push_back(buffer);
             buffer.clear();
-
-            ans.push_back(dat[dat.size() - 1]);
+            
+            for (unsigned i = 0; i < OUTPUT_COUNT; i++){
+                buffer.push_back(i == dat[dat.size() - 1] ? 1 : 0);    
+            }
+            ans.push_back(buffer);
+            buffer.clear();
         }
 	} else  
 		std::cout << "Could not open the file\n";
+
+    // std::cout << data << '\n';
+    //std::cout << ans;
 
     return dataset(data, ans);
 }
@@ -208,32 +215,33 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
             out.push_back(expl(values[network.first - 1][i]) / sum);
         }
         values[network.first - 1] = out;
+        out.clear();
     }
 }
 
-double NeuralNetwork::lossFunc(std::vector<double> *Ytrue, std::vector<double> *Ypred){
-    double msE = 0;
+double NeuralNetwork::lossFunc(std::vector<std::vector<double>> *Ytrue, std::vector<std::vector<double>> *Ypred){
+    double losses = 0;
     switch (loss){
         case MSE:
                 for (unsigned i = 0; i < Ytrue->size(); i++){
-                    msE += pow((*Ytrue)[i] - (*Ypred)[i], 2);
+                    losses += pow((*Ytrue)[i][0] - (*Ypred)[i][0], 2);
                 }
-            msE /= Ytrue->size();
-            return msE;
+            losses /= Ytrue->size();
         break;
         case categorical_crossentropy:
-            double crossE = 0;
             for (unsigned i = 0; i < Ytrue->size(); i++){
-                crossE -= (*Ytrue)[i] * log((*Ypred)[i]);
+                for (unsigned j = 0; j < (*Ytrue)[i].size(); j++){
+                    losses -= (*Ytrue)[i][j] * log((*Ypred)[i][j]);
+                }
             }
-            return crossE;
+            losses /= Ytrue->size();
         break;
     }
-    return 0;
+    return losses;
 }
 
 
-void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<double> *answers) {
+void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers) {
     std::cout << '\n';
     //*d_X | Cleans after every iteration
     std::vector<std::vector<double>> d_X;
@@ -272,7 +280,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
 
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
         //Vector for MSE
-        std::vector<double> Ypred;
+        std::vector<std::vector<double>> Ypred;
 
         for (unsigned set = 0; set < data->size(); set++) {
             //Feeding data to the net
@@ -280,8 +288,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
 
             //Calculating the derives for output layer
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
-                d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * 
+                d_X[network.first - 1][i] = ((*answers)[set][i] - values[network.first - 1][i]) * 
                         func_deriv(values[network.first - 1][i], network.second[network.first - 1].second);
+                        // std::cout << "d_X[" << i << "] output = " << values[network.first - 1][i] << '\n';
+                        // getchar();
             }
 
             //Calculating all other derives
@@ -291,7 +301,8 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
                         d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1].first - 1) + j];
                     }
                     d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
-
+                    // std::cout << "d_X[" << i << "][" << j << "] other = " << values[i][j] << '\n';
+                    // getchar();
                 }
             }
 
@@ -327,9 +338,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
                     GRADs[i][j] = 0;
                 }
             }
-            Ypred = values[network.first - 1];
+            Ypred.push_back(values[network.first - 1]);
         }
-        std::cout << '\r' << epoc << " Epoch, MSE = " << lossFunc(answers, &Ypred) << std::flush;
+        Ypred.clear();
+        std::cout << '\r' << epoc << " Epoch, loss = " << lossFunc(answers, &Ypred) << std::flush;
     }
     std::cout << "Done!" << '\n';
 }
