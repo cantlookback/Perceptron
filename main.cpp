@@ -16,7 +16,7 @@ int main(){
     net.addLayer(4, SIGMOID);
     net.addLayer(1, SIGMOID);
 
-    net.compile(0.7, 0.1, 1000, 1);
+    net.compile(0.7, 0.1, 1000, 1, MSE);
 
     net.fit(&train.data, &train.answers);
 

@@ -6,6 +6,11 @@
 #include <fstream>
 #include <sstream>
 
+enum lossFunction{
+    MSE = 1,
+    categorical_crossentropy,
+};
+
 enum activeFunction{
     SIGMOID = 1,
     RELU,
@@ -44,7 +49,7 @@ public:
     void addLayer(unsigned neurons, activeFunction activeFunc);
 
     //Setting additional parameters for Network
-    void compile(double trainRate_t, double alpha_t, double epochs, bool bias);
+    void compile(double trainRate_t, double alpha_t, double epochs, bool bias, lossFunction loss_t);
 
     //View a model
     void print();
@@ -63,7 +68,7 @@ public:
 
 private:
 
-    //Switch of Activation Funcions
+    //Activation Funcions switch
     double actFunc(double arg, activeFunction f);
 
     //Derivatives of Activation Functions
@@ -72,8 +77,8 @@ private:
     //Setting random base weights
     void setWeights();
 
-    //Mean Square Error
-    double MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred);
+    //Loss Functions switch
+    double lossFunc(std::vector<double> *Ytrue, std::vector<double> *Ypred);
 
     //* {num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
@@ -81,6 +86,7 @@ private:
     std::vector<std::vector<double>> weights, values;
     double trainRate = 1, alpha = 1, epochs = 500;
     bool bias = 0;
+    lossFunction loss;
 };
 
 #endif

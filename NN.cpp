@@ -132,7 +132,7 @@ void NeuralNetwork::print(){
     std::cout << "TrainRate = " << trainRate << "\nAlpha = " << alpha << '\n';
 }
 
-void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t){
+void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t, lossFunction loss_t){
     if(network.first < 2){
         std::cout << "Cannot compile model, less than 2 layers\n";
         return;
@@ -142,6 +142,7 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     alpha = alpha_t;
     epochs = epochs_t;
     bias = bias_t;
+    loss = loss_t;
 
     weights.resize(network.first - 1);
     for (int i = 0; i < network.first - 1; i++) {
@@ -157,7 +158,6 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     this->setWeights();
     std::cout << "Compiling is done!\n";
 }
-
 
 void NeuralNetwork::feedForward(std::vector<double> *data) {
     //Copy data to input layer
@@ -188,14 +188,27 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
     }
 }
 
-double NeuralNetwork::MSE(std::vector<double> *Ytrue, std::vector<double> *Ypred) {
-    double mse = 0;
-    for (unsigned i = 0; i < Ytrue->size(); i++){
-        mse += pow((*Ytrue)[i] - (*Ypred)[i], 2);
+double NeuralNetwork::lossFunc(std::vector<double> *Ytrue, std::vector<double> *Ypred){
+    double msE = 0;
+    switch (loss){
+        case MSE:
+                for (unsigned i = 0; i < Ytrue->size(); i++){
+                    msE += pow((*Ytrue)[i] - (*Ypred)[i], 2);
+                }
+            msE /= Ytrue->size();
+            return msE;
+        break;
+        case categorical_crossentropy:
+            double crossE = 0;
+            for (unsigned i = 0; i < Ytrue->size(); i++){
+                crossE -= (*Ytrue)[i] * log((*Ypred)[i]);
+            }
+            return crossE;
+        break;
     }
-    mse /= Ytrue->size();
-    return mse;
+    return 0;
 }
+
 
 void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<double> *answers) {
     std::cout << '\n';
@@ -291,10 +304,9 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
                     GRADs[i][j] = 0;
                 }
             }
-            Ypred.push_back(values[network.first - 1][0]);
+            Ypred = values[network.first - 1];
         }
-        std::cout << '\r' << epoc << " Epoch, MSE = " << MSE(answers, &Ypred) << std::flush;
-        Ypred.clear();
+        std::cout << '\r' << epoc << " Epoch, MSE = " << lossFunc(answers, &Ypred) << std::flush;
     }
     std::cout << "Done!" << '\n';
 }
