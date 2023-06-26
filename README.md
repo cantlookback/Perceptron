@@ -2,10 +2,11 @@
 
 ## List of features
 
-1. Three **Activation Functions** included:
+1. **Activation Functions** included:
     * Sigmoid
     * ReLU
     * Tahn
+    * SoftMax
 2. Adding **layers** with different amount of neurons and activation functions.
 3. Bool trigger for turning on/off **Bias** feature.
 4. Included function for recieving data from **.csv** file.
