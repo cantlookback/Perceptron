@@ -48,9 +48,6 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
 	} else  
 		std::cout << "Could not open the file\n";
 
-    // std::cout << data << '\n';
-    //std::cout << ans;
-
     return dataset(data, ans);
 }
 
@@ -163,7 +160,6 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     weights.resize(network.first - 1);
     for (int i = 0; i < network.first - 1; i++) {
         weights[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
-        //std::cout << "Weight " << i << " size === " << weights[i].size() << '\n';
     }
     
     values.resize(network.first);
@@ -195,10 +191,8 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
         for (unsigned j = 0; j < network.second[i].first; j++) {        //Neurons on i layer
             for (unsigned k = 0; k < network.second[i - 1].first; k++) {        //Neurons on i - 1 layer
                 values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
-                //std::cout << "v[" << i - 1 << "][" << k << "] * w[" << i - 1 << "][" << k * network.second[i].first + j << "]" << '\n';
             }
             if (bias) values[i][j] += 1 * weights[i - 1][weights[i - 1].size() - network.second[i].first + j];
-            //std::cout << 1 << " * w[" << i - 1 << "][" << weights[i - 1].size() - network.second[i].first + j << "]" << '\n';
             if (network.second[i].second != SOFTMAX){
                 values[i][j] = actFunc(values[i][j], network.second[i].second);
             }
@@ -215,7 +209,6 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
             out.push_back(expl(values[network.first - 1][i]) / sum);
         }
         values[network.first - 1] = out;
-        out.clear();
     }
 }
 
@@ -255,11 +248,13 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
     dW.resize(weights.size());
 
     for (unsigned i = 0; i < d_X.size(); i++) {
-        d_X[i].resize(network.second[i].first);
+        d_X[i].resize(network.second[i].first + (i == d_X.size() - 1 ? 0 : bias));
     }
+
     for (int i = 0; i < network.first - 1; i++) {
         GRADs[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
     }
+
     for (int i = 0; i < dW.size(); i++){
         dW[i].resize(weights[i].size());
     }
@@ -290,26 +285,31 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
                 d_X[network.first - 1][i] = ((*answers)[set][i] - values[network.first - 1][i]) * 
                         func_deriv(values[network.first - 1][i], network.second[network.first - 1].second);
-                        // std::cout << "d_X[" << i << "] output = " << values[network.first - 1][i] << '\n';
-                        // getchar();
             }
+
 
             //Calculating all other derives
             for (int i = network.first - 2; i >= 0; i--) {
                 for (unsigned j = 0; j < d_X[i].size(); j++) {
-                    for (unsigned k = 0; k < d_X[i + 1].size(); k++) {
-                        d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1].first - 1) + j];
+                    for (unsigned k = 0; k < d_X[i + 1].size() - (i < network.first - 2 ? bias : 0); k++) {
+                            d_X[i][j] += d_X[i + 1][k] * weights[i][k + network.second[i + 1].first * j];
                     }
-                    d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
-                    // std::cout << "d_X[" << i << "][" << j << "] other = " << values[i][j] << '\n';
-                    // getchar();
+                    if (bias && (j == d_X[i].size() - 1)){
+                        d_X[i][j] *= func_deriv(1, network.second[i].second);
+                    } else {
+                        d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
+                    }
                 }
             }
 
             //Calculating Gradients
             for (unsigned i = 0; i < GRADs.size(); i++) {
                 for (unsigned j = 0; j < GRADs[i].size(); j++) {
-                    GRADs[i][j] = values[i][j % values[i].size()] * d_X[i + 1][int(j / values[i].size())];
+                    if (bias && (j >= (network.second[i].first * network.second[i + 1].first))){
+                        GRADs[i][j] = 1 * d_X[i + 1][j % network.second[i + 1].first];
+                    } else {
+                        GRADs[i][j] = values[i][j / network.second[i + 1].first] * d_X[i + 1][j % network.second[i + 1].first];
+                    }
                 }
             }
 
@@ -340,8 +340,8 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
             }
             Ypred.push_back(values[network.first - 1]);
         }
-        Ypred.clear();
         std::cout << '\r' << epoc << " Epoch, loss = " << lossFunc(answers, &Ypred) << std::flush;
+        Ypred.clear();
     }
-    std::cout << "Done!" << '\n';
+    std::cout << "\nDone!\n";
 }
