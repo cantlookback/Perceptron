@@ -1,5 +1,5 @@
-#ifndef NN_H
-#define NN_H
+#ifndef NN_H_
+#define NN_H_
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -11,6 +11,7 @@ enum lossFunction{
     categorical_crossentropy,
 };
 
+//Enum for Activation Functions enumeration
 enum activeFunction{
     SIGMOID = 1,
     RELU,
@@ -20,26 +21,18 @@ enum activeFunction{
 
 //Custom structure for dataset
 struct dataset{
-    dataset(std::vector<std::vector<double>> t_data, std::vector<double> t_answers) : 
+    dataset(std::vector<std::vector<double>> t_data, std::vector<std::vector<double>> t_answers) : 
             data(t_data), answers(t_answers){};
     std::vector<std::vector<double>> data;
-    std::vector<double> answers;
+    std::vector<std::vector<double>> answers;
 };
 
 //PATH - path to .csv file, ANS_COUNT - number of values on the output layer
-dataset loadData(std::string PATH, unsigned ANS_COUNT);
+dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT);
 
 //Overload for vector<> printing
 template <typename T>
-std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
-    os << '[';
-    for (unsigned i = 0; i < values.size(); i++){
-        os << values[i];
-        if (i != values.size() - 1) os << ", ";
-    }
-    os << ']';
-    return os;
-}
+std::ostream& operator<<(std::ostream &os, std::vector<T> &values);
 
 class NeuralNetwork{
 public:
@@ -58,13 +51,13 @@ public:
     void output();
 
     //Train
-    void fit(std::vector<std::vector<double>> *data, std::vector<double> *answers);
+    void fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers);
 
     //Running...
     void feedForward(std::vector<double> *data);
 
     //Getting output value
-    double getOut();
+    std::vector<double>* getOut();
 
 private:
 
@@ -78,15 +71,15 @@ private:
     void setWeights();
 
     //Loss Functions switch
-    double lossFunc(std::vector<double> *Ytrue, std::vector<double> *Ypred);
+    double lossFunc(std::vector<std::vector<double>> *Ytrue, std::vector<std::vector<double>> *Ypred);
 
-    //* {num of Layers, {neurons on layer, layer activ_function}}
+    //*{num of Layers, {neurons on layer, layer activ_function}}
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
-    //* Weights of axons || Values of neurons in each layer
+    //*Weights of axons || Values of neurons in each layer
     std::vector<std::vector<double>> weights, values;
     double trainRate = 1, alpha = 1, epochs = 500;
     bool bias = 0;
     lossFunction loss;
 };
 
-#endif
+#endif //NN_H_

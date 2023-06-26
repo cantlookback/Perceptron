@@ -1,11 +1,11 @@
 #include "NN.h"
 
-dataset loadData(std::string PATH, unsigned ANS_COUNT){
+dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
 
     std::vector<std::vector<double>> content;
     std::vector<std::vector<double>> data;
-    std::vector<double> ans;
+    std::vector<std::vector<double>> ans;
 
     if(dataFile.is_open()){
 	    std::vector<double> row;
@@ -38,13 +38,28 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT){
             }
             data.push_back(buffer);
             buffer.clear();
-
-            ans.push_back(dat[dat.size() - 1]);
+            
+            for (unsigned i = 0; i < OUTPUT_COUNT; i++){
+                buffer.push_back(i == dat[dat.size() - 1] ? 1 : 0);    
+            }
+            ans.push_back(buffer);
+            buffer.clear();
         }
 	} else  
 		std::cout << "Could not open the file\n";
 
     return dataset(data, ans);
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
+    os << '[';
+    for (unsigned i = 0; i < values.size(); i++){
+        os << values[i];
+        if (i != values.size() - 1) os << ", ";
+    }
+    os << ']';
+    return os;
 }
 
 NeuralNetwork::NeuralNetwork(){};
@@ -58,12 +73,10 @@ double NeuralNetwork::actFunc(double arg, activeFunction f){
             return arg < 0 ? 0 : arg;
         break;
         case TANH:
-            //? Workaround, because when arg is > 11356 expl(x) turns to NaN
-            //? Need to find a better solution?
-            return arg > 10000 ? 1 : (expl(arg) - expl(-arg)) / (expl(arg) + expl(-arg));
+            return tanh(arg);
         break;
         case SOFTMAX:
-            //TODO: WIP
+            //! Calculates in FeedForward() function
         break;
     }
     return 0;
@@ -81,7 +94,7 @@ double NeuralNetwork::func_deriv(double arg, activeFunction f){
             return 1 - pow(arg, 2);
         break;
         case SOFTMAX:
-            //TODO: WIP
+            return arg * (1 - arg);
         break;
     }
     return 0;
@@ -110,8 +123,8 @@ void NeuralNetwork::output(){
     return;
 }
 
-double NeuralNetwork::getOut(){
-    return values[network.first - 1][0];
+std::vector<double>* NeuralNetwork::getOut(){
+    return &values[network.first - 1];
 }
 
 void NeuralNetwork::print(){
@@ -147,7 +160,6 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     weights.resize(network.first - 1);
     for (int i = 0; i < network.first - 1; i++) {
         weights[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
-        //std::cout << "Weight " << i << " size === " << weights[i].size() << '\n';
     }
     
     values.resize(network.first);
@@ -175,42 +187,54 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
     //! Value of current neuron = SUM of previous layer neurons * appropriate weight
     //! Then using activation function on our value
 
-    for (unsigned i = 1; i < network.first; i++) {
-        for (unsigned j = 0; j < network.second[i].first; j++) {
-            for (unsigned k = 0; k < network.second[i - 1].first; k++) {
+    for (unsigned i = 1; i < network.first; i++) {        //Layers
+        for (unsigned j = 0; j < network.second[i].first; j++) {        //Neurons on i layer
+            for (unsigned k = 0; k < network.second[i - 1].first; k++) {        //Neurons on i - 1 layer
                 values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
-                //std::cout << "v[" << i - 1 << "][" << k << "] * w[" << i - 1 << "][" << k * network.second[i].first + j << "]" << '\n';
             }
             if (bias) values[i][j] += 1 * weights[i - 1][weights[i - 1].size() - network.second[i].first + j];
-            //std::cout << 1 << " * w[" << i - 1 << "][" << weights[i - 1].size() - network.second[i].first + j << "]" << '\n';
-            values[i][j] = actFunc(values[i][j], network.second[i].second);
+            if (network.second[i].second != SOFTMAX){
+                values[i][j] = actFunc(values[i][j], network.second[i].second);
+            }
         }
+    }
+
+    if (network.second[network.first - 1].second == SOFTMAX){
+        std::vector<double> out;
+        for (unsigned i = 0; i < network.second[network.first - 1].first; i++){
+            double sum = 0;
+            for (unsigned j = 0; j < network.second[network.first - 1].first; j++){
+                sum += expl(values[network.first - 1][j]);
+            }
+            out.push_back(expl(values[network.first - 1][i]) / sum);
+        }
+        values[network.first - 1] = out;
     }
 }
 
-double NeuralNetwork::lossFunc(std::vector<double> *Ytrue, std::vector<double> *Ypred){
-    double msE = 0;
+double NeuralNetwork::lossFunc(std::vector<std::vector<double>> *Ytrue, std::vector<std::vector<double>> *Ypred){
+    double losses = 0;
     switch (loss){
         case MSE:
                 for (unsigned i = 0; i < Ytrue->size(); i++){
-                    msE += pow((*Ytrue)[i] - (*Ypred)[i], 2);
+                    losses += pow((*Ytrue)[i][0] - (*Ypred)[i][0], 2);
                 }
-            msE /= Ytrue->size();
-            return msE;
+            losses /= Ytrue->size();
         break;
         case categorical_crossentropy:
-            double crossE = 0;
             for (unsigned i = 0; i < Ytrue->size(); i++){
-                crossE -= (*Ytrue)[i] * log((*Ypred)[i]);
+                for (unsigned j = 0; j < (*Ytrue)[i].size(); j++){
+                    losses -= (*Ytrue)[i][j] * log((*Ypred)[i][j]);
+                }
             }
-            return crossE;
+            losses /= Ytrue->size();
         break;
     }
-    return 0;
+    return losses;
 }
 
 
-void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<double> *answers) {
+void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers) {
     std::cout << '\n';
     //*d_X | Cleans after every iteration
     std::vector<std::vector<double>> d_X;
@@ -224,11 +248,13 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
     dW.resize(weights.size());
 
     for (unsigned i = 0; i < d_X.size(); i++) {
-        d_X[i].resize(network.second[i].first);
+        d_X[i].resize(network.second[i].first + (i == d_X.size() - 1 ? 0 : bias));
     }
+
     for (int i = 0; i < network.first - 1; i++) {
         GRADs[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
     }
+
     for (int i = 0; i < dW.size(); i++){
         dW[i].resize(weights[i].size());
     }
@@ -249,7 +275,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
 
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
         //Vector for MSE
-        std::vector<double> Ypred;
+        std::vector<std::vector<double>> Ypred;
 
         for (unsigned set = 0; set < data->size(); set++) {
             //Feeding data to the net
@@ -257,25 +283,33 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
 
             //Calculating the derives for output layer
             for (unsigned i = 0; i < d_X[network.first - 1].size(); i++) {
-                d_X[network.first - 1][i] = ((*answers)[set] - values[network.first - 1][i]) * 
+                d_X[network.first - 1][i] = ((*answers)[set][i] - values[network.first - 1][i]) * 
                         func_deriv(values[network.first - 1][i], network.second[network.first - 1].second);
             }
+
 
             //Calculating all other derives
             for (int i = network.first - 2; i >= 0; i--) {
                 for (unsigned j = 0; j < d_X[i].size(); j++) {
-                    for (unsigned k = 0; k < d_X[i + 1].size(); k++) {
-                        d_X[i][j] += d_X[i + 1][k] * weights[i][k * (network.second[i + 1].first - 1) + j];
+                    for (unsigned k = 0; k < d_X[i + 1].size() - (i < network.first - 2 ? bias : 0); k++) {
+                            d_X[i][j] += d_X[i + 1][k] * weights[i][k + network.second[i + 1].first * j];
                     }
-                    d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
-
+                    if (bias && (j == d_X[i].size() - 1)){
+                        d_X[i][j] *= func_deriv(1, network.second[i].second);
+                    } else {
+                        d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
+                    }
                 }
             }
 
             //Calculating Gradients
             for (unsigned i = 0; i < GRADs.size(); i++) {
                 for (unsigned j = 0; j < GRADs[i].size(); j++) {
-                    GRADs[i][j] = values[i][j % values[i].size()] * d_X[i + 1][int(j / values[i].size())];
+                    if (bias && (j >= (network.second[i].first * network.second[i + 1].first))){
+                        GRADs[i][j] = 1 * d_X[i + 1][j % network.second[i + 1].first];
+                    } else {
+                        GRADs[i][j] = values[i][j / network.second[i + 1].first] * d_X[i + 1][j % network.second[i + 1].first];
+                    }
                 }
             }
 
@@ -304,9 +338,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<doub
                     GRADs[i][j] = 0;
                 }
             }
-            Ypred = values[network.first - 1];
+            Ypred.push_back(values[network.first - 1]);
         }
-        std::cout << '\r' << epoc << " Epoch, MSE = " << lossFunc(answers, &Ypred) << std::flush;
+        std::cout << '\r' << epoc << " Epoch, loss = " << lossFunc(answers, &Ypred) << std::flush;
+        Ypred.clear();
     }
-    std::cout << "Done!" << '\n';
+    std::cout << "\nDone!\n";
 }
