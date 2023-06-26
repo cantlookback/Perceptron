@@ -76,7 +76,7 @@ double NeuralNetwork::actFunc(double arg, activeFunction f){
             return tanh(arg);
         break;
         case SOFTMAX:
-            //TODO: WIP
+            //! Calculates in FeedForward() function
         break;
     }
     return 0;
