@@ -2,9 +2,12 @@
 
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
-
+    
+    //Container with all samples (data, answers)
     std::vector<std::vector<double>> content;
+    //Only data part of samples
     std::vector<std::vector<double>> data;
+    //Only answers part of samples
     std::vector<std::vector<double>> ans;
 
     if(dataFile.is_open()){
@@ -45,8 +48,10 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             ans.push_back(buffer);
             buffer.clear();
         }
-	} else  
+	} else  {
 		std::cout << "Could not open the file\n";
+        exit;
+    }
 
     return dataset(data, ans);
 }
@@ -111,7 +116,7 @@ void NeuralNetwork::setWeights() {
 void NeuralNetwork::addLayer(unsigned neurons, activeFunction activeFunc){
     if (neurons <= 0){
         std::cout << "Cannot add layer with <1 neurons\n";
-        return;
+        exit;
     }
 
     network.first++;
@@ -148,7 +153,7 @@ void NeuralNetwork::print(){
 void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t, lossFunction loss_t){
     if(network.first < 2){
         std::cout << "Cannot compile model, less than 2 layers\n";
-        return;
+        exit;
     }
 
     trainRate = trainRate_t;
@@ -161,7 +166,7 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     for (int i = 0; i < network.first - 1; i++) {
         weights[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
     }
-    
+
     values.resize(network.first);
     for (unsigned i = 0; i <= weights.size(); i++) {
         values[i].resize(network.second[i].first);
@@ -172,13 +177,13 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
 }
 
 void NeuralNetwork::feedForward(std::vector<double> *data) {
+    //Clearing values and
     //Copy data to input layer
     for (int i = 0; i < values.size(); i++){
         for (int j = 0; j < values[i].size(); j++){
             values[i][j] = 0;
         }
     }
-
     values[0] = *data;
 
     //! For each layer, starting with i = 1
@@ -199,6 +204,7 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
         }
     }
 
+    //SoftMax activation
     if (network.second[network.first - 1].second == SOFTMAX){
         std::vector<double> out;
         for (unsigned i = 0; i < network.second[network.first - 1].first; i++){
@@ -216,9 +222,9 @@ double NeuralNetwork::lossFunc(std::vector<std::vector<double>> *Ytrue, std::vec
     double losses = 0;
     switch (loss){
         case MSE:
-                for (unsigned i = 0; i < Ytrue->size(); i++){
-                    losses += pow((*Ytrue)[i][0] - (*Ypred)[i][0], 2);
-                }
+            for (unsigned i = 0; i < Ytrue->size(); i++){
+                losses += pow((*Ytrue)[i][0] - (*Ypred)[i][0], 2);
+            }
             losses /= Ytrue->size();
         break;
         case categorical_crossentropy:
@@ -258,23 +264,9 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
     for (int i = 0; i < dW.size(); i++){
         dW[i].resize(weights[i].size());
     }
-/*
-    std::cout << "---d_X sizes---\n";
-    for (auto dx : d_X){
-        std::cout << "[" << dx.size() << "]" << '\n';
-    }
-    std::cout << "---GRADs sizes---\n";
-    for (auto dx : GRADs){
-        std::cout << "[" << dx.size() << "]" << '\n';
-    }
-    std::cout << "---dW sizes---\n";
-    for (auto dx : dW){
-        std::cout << "[" << dx.size() << "]" << '\n';
-    }
-*/
 
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
-        //Vector for MSE
+        //Vector for loss calculation
         std::vector<std::vector<double>> Ypred;
 
         for (unsigned set = 0; set < data->size(); set++) {

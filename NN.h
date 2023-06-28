@@ -6,12 +6,13 @@
 #include <fstream>
 #include <sstream>
 
+//Loss Function enumeration
 enum lossFunction{
     MSE = 1,
     categorical_crossentropy,
 };
 
-//Enum for Activation Functions enumeration
+//Activation Functions enumeration
 enum activeFunction{
     SIGMOID = 1,
     RELU,
@@ -39,7 +40,7 @@ public:
     NeuralNetwork();
 
     //Adding layer in NN
-    void addLayer(unsigned neurons, activeFunction activeFunc);
+    void addLayer(unsigned neurons, activeFunction activeFunc = SIGMOID);
 
     //Setting additional parameters for Network
     void compile(double trainRate_t, double alpha_t, double epochs, bool bias, lossFunction loss_t);
@@ -56,7 +57,7 @@ public:
     //Running...
     void feedForward(std::vector<double> *data);
 
-    //Getting output value
+    //Getting output values
     std::vector<double>* getOut();
 
 private:
@@ -77,8 +78,11 @@ private:
     std::pair<int, std::vector<std::pair<int, activeFunction>>> network = {0, {}};
     //*Weights of axons || Values of neurons in each layer
     std::vector<std::vector<double>> weights, values;
+    //*Hyperparameters
     double trainRate = 1, alpha = 1, epochs = 500;
+    //*Bias marker
     bool bias = 0;
+    //*Loss function for switch
     lossFunction loss;
 };
 
