@@ -2,13 +2,14 @@
 
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
-    
     //Container with all samples (data, answers)
     std::vector<std::vector<double>> content;
-    //Only data part of samples
+    //Train part
     std::vector<std::vector<double>> data;
-    //Only answers part of samples
     std::vector<std::vector<double>> ans;
+    //Test part
+    std::vector<std::vector<double>> test_data;
+    std::vector<std::vector<double>> test_ans;
 
     if(dataFile.is_open()){
 	    std::vector<double> row;
@@ -32,20 +33,35 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             row.clear();
         }
 
+        std::shuffle(content.begin(), content.end(), std::default_random_engine());
+
         //Separating content --> data, answers
-        for (std::vector<double> dat : content){
+        for (unsigned i = 0; i < content.size(); i++){
             std::vector<double> buffer;
 
-            for (unsigned i = 0; i < dat.size() - ANS_COUNT; i++){
-                buffer.push_back(dat[i]);
+            for (unsigned j = 0; j < content[i].size() - ANS_COUNT; j++){
+                buffer.push_back(content[i][j]);
             }
-            data.push_back(buffer);
+            //Pass 10% of dataset to testing part
+            if (i <= content.size() * 0.9){
+                data.push_back(buffer);
+            } else {
+                test_data.push_back(buffer);
+            }
+
             buffer.clear();
             
-            for (unsigned i = 0; i < OUTPUT_COUNT; i++){
-                buffer.push_back(i == dat[dat.size() - 1] ? 1 : 0);    
+            for (unsigned j = 0; j < OUTPUT_COUNT; j++){
+                buffer.push_back(j == content[i][content[i].size() - 1] ? 1 : 0);    
             }
-            ans.push_back(buffer);
+
+            //Pass 10% of dataset to testing part
+            if (i <= content.size() * 0.9){
+                ans.push_back(buffer);
+            } else {
+                test_ans.push_back(buffer);
+            }
+
             buffer.clear();
         }
 	} else  {
@@ -53,7 +69,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
         exit;
     }
 
-    return dataset(data, ans);
+    return dataset(data, ans, test_data, test_ans);
 }
 
 template <typename T>

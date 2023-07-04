@@ -20,49 +20,44 @@ void normalizeData(vector<vector<double>> *data){
 }
 
 int main(){
-    dataset train = loadData("C:/Perceptron/data/diabetes.csv", 1, 1);
+    dataset samples = loadData("C:/Perceptron/data/IrisTrain3.csv", 1, 3);
     //Iris -- 0.7, 0.1, 1000, 1 || [4, 8, 4, 1]
 
-    unsigned INPUT_SIZE = train.data[0].size();
-
-    normalizeData(&train.data);
+    unsigned INPUT_SIZE = samples.data[0].size();
 
     NeuralNetwork net;
 
     net.addLayer(INPUT_SIZE);
     net.addLayer(8, SIGMOID);
     net.addLayer(4, SIGMOID);
-    net.addLayer(1, SIGMOID);
+    net.addLayer(3, SOFTMAX);
 
-    net.compile(0.7, 0.1, 100, 1, MSE);
+    net.compile(0.7, 0.1, 1000, 1, categorical_crossentropy);
 
-    net.fit(&train.data, &train.answers);
+    net.fit(&samples.data, &samples.answers);
 
-    vector<double> test;
-    test.resize(INPUT_SIZE);
-    while (true){
-        std::cout << "Input >>";
-        for (unsigned i = 0; i < INPUT_SIZE; i++){            
-            std::cin >> test[i];
-        }
-        net.feedForward(&test);
+    // vector<double> test;
+    // test.resize(INPUT_SIZE);
+    // while (true){
+    //     std::cout << "Input >>";
+    //     for (unsigned i = 0; i < INPUT_SIZE; i++){            
+    //         std::cin >> test[i];
+    //     }
+    //     net.feedForward(&test);
 
-        net.output();
-    }
+    //     net.output();
+    // }
 
     //? DATA TEST MODULE
-    // dataset test = loadData("C:/Perceptron/test/IrisTest3.csv", 1, 3);
 
-    // normalizeData(&test.data);
+    for (unsigned i = 0; i < samples.test_data.size(); i++){
+        std::cout << "Row " << i << " testing..." << '\n';
 
-    // for (unsigned i = 0; i < test.data.size(); i++){
-    //     std::cout << "Row " << i << " testing..." << '\n';
+        net.feedForward(&(samples.test_data[i]));
 
-    //     net.feedForward(&(test.data[i]));
-
-    //     std::cout << "Got -->" << *net.getOut() << '\n';
-    //     std::cout << "True ->" << test.answers[i] << '\n';
-    // }
+        std::cout << "Got -->" << *net.getOut() << '\n';
+        std::cout << "True ->" << samples.test_answers[i] << '\n';
+    }
 
     return 0;
 }
