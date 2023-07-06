@@ -1,9 +1,26 @@
 #include "NN.h"
 
+void normalizeData(std::vector<std::vector<double>> *data){
+    double maxDot = 0, minDot = (*data)[0][0];
+    for (unsigned i = 0; i < (*data)[0].size(); i++){
+        for (unsigned j = 0; j < data->size(); j++){
+            maxDot = ((*data)[j][i]) > maxDot ? ((*data)[j][i]) : maxDot;
+            minDot = ((*data)[j][i]) < minDot ? ((*data)[j][i]) : minDot;
+        }
+        for (unsigned k = 0; k < data->size(); k++){
+            (*data)[k][i] = (((*data)[k][i]) - minDot) / (maxDot - minDot);
+        }
+        maxDot = 0;
+        minDot = (*data)[0][0];
+    }
+}
+
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
     //Container with all samples (data, answers)
     std::vector<std::vector<double>> content;
+    //Buffer
+    std::vector<std::vector<double>> bufDat;
     //Train part
     std::vector<std::vector<double>> data;
     std::vector<std::vector<double>> ans;
@@ -42,15 +59,10 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             for (unsigned j = 0; j < content[i].size() - ANS_COUNT; j++){
                 buffer.push_back(content[i][j]);
             }
-            //Pass 10% of dataset to testing part
-            if (i <= content.size() * 0.9){
-                data.push_back(buffer);
-            } else {
-                test_data.push_back(buffer);
-            }
+                bufDat.push_back(buffer);
 
             buffer.clear();
-            
+
             for (unsigned j = 0; j < OUTPUT_COUNT; j++){
                 buffer.push_back(j == content[i][content[i].size() - 1] ? 1 : 0);    
             }
@@ -67,6 +79,20 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
 	} else  {
 		std::cout << "Could not open the file\n";
         exit;
+    }
+
+    normalizeData(&bufDat);
+
+    for (unsigned i = 0; i < bufDat.size(); i++){
+        if (i < bufDat.size() * 0.9){
+            data.push_back(bufDat[i]);
+        } else {
+            test_data.push_back(bufDat[i]);
+        }
+    }
+
+    for (auto dat : data){
+        std::cout << dat << '\n';
     }
 
     return dataset(data, ans, test_data, test_ans);
