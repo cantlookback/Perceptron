@@ -5,6 +5,8 @@
 #include <cmath>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <random>
 
 //Loss Function enumeration
 enum lossFunction{
@@ -22,10 +24,16 @@ enum activeFunction{
 
 //Custom structure for dataset
 struct dataset{
-    dataset(std::vector<std::vector<double>> t_data, std::vector<std::vector<double>> t_answers) : 
-            data(t_data), answers(t_answers){};
+    dataset(std::vector<std::vector<double>> t_data, std::vector<std::vector<double>> t_answers, 
+            std::vector<std::vector<double>> t_test_data, std::vector<std::vector<double>> t_test_answers) : 
+            data(t_data), answers(t_answers), test_data(t_test_data), test_answers(t_test_answers){};
+            
+    //Train part
     std::vector<std::vector<double>> data;
     std::vector<std::vector<double>> answers;
+    //Test part
+    std::vector<std::vector<double>> test_data;
+    std::vector<std::vector<double>> test_answers;
 };
 
 //PATH - path to .csv file, ANS_COUNT - number of values on the output layer
