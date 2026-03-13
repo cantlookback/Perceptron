@@ -8,6 +8,7 @@ void normalizeData(std::vector<std::vector<double>> *data){
             minDot = ((*data)[j][i]) < minDot ? ((*data)[j][i]) : minDot;
         }
         for (unsigned k = 0; k < data->size(); k++){
+            if (maxDot == minDot) continue;
             (*data)[k][i] = (((*data)[k][i]) - minDot) / (maxDot - minDot);
         }
         maxDot = 0;
