@@ -79,7 +79,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
         }
 	} else  {
 		std::cout << "Could not open the file\n";
-        exit;
+        exit(1);
     }
 
     normalizeData(&bufDat);
@@ -159,7 +159,7 @@ void NeuralNetwork::setWeights() {
 void NeuralNetwork::addLayer(unsigned neurons, activeFunction activeFunc){
     if (neurons <= 0){
         std::cout << "Cannot add layer with <1 neurons\n";
-        exit;
+        exit(1);
     }
 
     network.first++;
@@ -196,7 +196,7 @@ void NeuralNetwork::print(){
 void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t, lossFunction loss_t){
     if(network.first < 2){
         std::cout << "Cannot compile model, less than 2 layers\n";
-        exit;
+        exit(1);
     }
 
     trainRate = trainRate_t;
