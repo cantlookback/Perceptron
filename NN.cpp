@@ -1,7 +1,7 @@
 #include "NN.h"
 
 void normalizeData(std::vector<std::vector<double>> *data){
-    double maxDot = 0, minDot = (*data)[0][0];
+    double maxDot = (*data)[0][0], minDot = (*data)[0][0];
     for (unsigned i = 0; i < (*data)[0].size(); i++){
         for (unsigned j = 0; j < data->size(); j++){
             maxDot = ((*data)[j][i]) > maxDot ? ((*data)[j][i]) : maxDot;
