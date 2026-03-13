@@ -16,6 +16,7 @@ void normalizeData(std::vector<std::vector<double>> *data){
     }
 }
 
+//Progress bar for training
 void printProgress(unsigned epoch, unsigned total_epochs, double loss)
 {
     const int barWidth = 40;
@@ -38,6 +39,30 @@ void printProgress(unsigned epoch, unsigned total_epochs, double loss)
               << std::flush;
 }
 
+//Progress bar for data loading
+void printProgress(size_t current, size_t total){
+    static int last_percent = -1;
+
+    int percent = (100 * current) / total;
+    if (percent == last_percent) return;
+    last_percent = percent;
+
+    const int barWidth = 40;
+    int pos = barWidth * percent / 100;
+
+    std::string bar = "\rLoading data [";
+
+    for (int i = 0; i < barWidth; i++) {
+        if (i < pos) bar += '=';
+        else if (i == pos) bar += '>';
+        else bar += ' ';
+    }
+
+    bar += "] " + std::to_string(percent + 1) + "%";
+
+    std::cout << bar << std::flush;
+}
+
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
     //Container with all samples (data, answers)
@@ -53,6 +78,15 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     //Train data part %
     const double trainPercent = 0.7;
 
+    size_t total_lines = 0;
+    std::string tmp;
+
+    while (getline(dataFile, tmp))
+        total_lines++;
+
+    dataFile.clear();
+    dataFile.seekg(0);
+
     if(dataFile.is_open()){
 	    std::vector<double> row;
     	std::string line;
@@ -62,8 +96,13 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             getline(dataFile, line);
         }
 
+        size_t line_count = 0;
+
         //Parsing through all lines and putting in vector<vector<double>>
     	while (getline(dataFile, line)){
+            line_count++;
+            printProgress(line_count, total_lines);
+
             std::istringstream iss(line);
             std::string token;
 
@@ -77,7 +116,6 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
         
         std::mt19937 rng(std::random_device{}());
         std::shuffle(content.begin(), content.end(), rng);
-        std::shuffle(content.begin(), content.end(), std::default_random_engine());
 
         //Separating content --> data, answers
         for (unsigned i = 0; i < content.size(); i++){
@@ -95,7 +133,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             }
 
             //Pass 20% of dataset to testing part
-            if (i <= content.size() * trainPercent){
+            if (i < content.size() * trainPercent){
                 ans.push_back(buffer);
             } else {
                 test_ans.push_back(buffer);
@@ -118,9 +156,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
         }
     }
 
-    for (auto dat : data){
-        std::cout << dat << '\n';
-    }
+    std::cout << "\nDataset loaded\n";
 
     return dataset(data, ans, test_data, test_ans);
 }
