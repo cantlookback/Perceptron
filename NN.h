@@ -37,7 +37,9 @@ struct dataset{
     std::vector<std::vector<double>> test_answers;
 };
 
-//PATH - path to .csv file, ANS_COUNT - number of values on the output layer
+//PATH - path to .csv file
+//ANS_COUNT - number of answer values
+//OUTPUT_COUNT - number of classes
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT);
 
 //Overload for vector<> printing
