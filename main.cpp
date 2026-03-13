@@ -4,8 +4,8 @@
 using namespace std;
 
 int main(){
-    dataset samples = loadData("C:/Perceptron/data/IrisTrain3.csv", 1, 3);
-    //Iris -- 0.7, 0.1, 1000, 1 || [4, 8, 4, 1]
+    dataset samples = loadData("C:/pomoika/Perceptron/data/IrisTrain3.csv", 1, 3);
+    //Iris -- 0.7, 0.1, 1000, 1 || [4, 8, 4, 3]
 
     unsigned INPUT_SIZE = samples.data[0].size();
 

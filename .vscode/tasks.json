@@ -4,7 +4,7 @@
 		{
 			"type": "cppbuild",
 			"label": "Standard",
-			"command": "C:\\MinGW\\bin\\g++.exe",
+			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
@@ -21,12 +21,12 @@
 			"group": {
 				"kind": "build",
 			},
-			"detail": "компилятор: C:\\MinGW\\bin\\g++.exe"
+			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\gcc.exe"
 		},
 		{
 			"type": "cppbuild",
 			"label": "Perceptron",
-			"command": "C:\\MinGW\\bin\\g++.exe",
+			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
@@ -42,12 +42,12 @@
 				"$gcc"
 			],
 			"group": "build",
-			"detail": "компилятор: C:\\MinGW\\bin\\g++.exe"
+			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\gcc.exe"
 		},
 		{
 			"type": "cppbuild",
 			"label": "NNlibrary",
-			"command": "C:\\MinGW\\bin\\g++.exe",
+			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
@@ -63,7 +63,7 @@
 				"$gcc"
 			],
 			"group": "build",
-			"detail": "компилятор: C:\\MinGW\\bin\\g++.exe"
+			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\gcc.exe"
 		}
 	]
 }
