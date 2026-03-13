@@ -28,6 +28,8 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     //Test part
     std::vector<std::vector<double>> test_data;
     std::vector<std::vector<double>> test_ans;
+    //Train data part %
+    const double trainPercent = 0.7;
 
     if(dataFile.is_open()){
 	    std::vector<double> row;
@@ -70,8 +72,8 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
                 buffer.push_back(j == content[i][content[i].size() - 1] ? 1 : 0);    
             }
 
-            //Pass 10% of dataset to testing part
-            if (i <= content.size() * 0.9){
+            //Pass 20% of dataset to testing part
+            if (i <= content.size() * trainPercent){
                 ans.push_back(buffer);
             } else {
                 test_ans.push_back(buffer);
@@ -87,7 +89,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     normalizeData(&bufDat);
 
     for (unsigned i = 0; i < bufDat.size(); i++){
-        if (i < bufDat.size() * 0.9){
+        if (i < bufDat.size() * trainPercent){
             data.push_back(bufDat[i]);
         } else {
             test_data.push_back(bufDat[i]);
