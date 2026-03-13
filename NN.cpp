@@ -50,7 +50,9 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             content.push_back(row);
             row.clear();
         }
-
+        
+        std::mt19937 rng(std::random_device{}());
+        std::shuffle(content.begin(), content.end(), rng);
         std::shuffle(content.begin(), content.end(), std::default_random_engine());
 
         //Separating content --> data, answers
@@ -149,9 +151,12 @@ double NeuralNetwork::func_deriv(double arg, activeFunction f){
 }
 
 void NeuralNetwork::setWeights() {
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+
     for (unsigned i = 0; i < weights.size(); i++) {
         for (unsigned j = 0; j < weights[i].size(); j++) {
-            weights[i][j] = (static_cast<double>(rand()) / RAND_MAX) * 2 - 1;
+            weights[i][j] = dist(rng);;
         }
     }
 }
