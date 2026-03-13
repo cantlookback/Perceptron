@@ -21,22 +21,32 @@ void printProgress(unsigned epoch, unsigned total_epochs, double loss)
 {
     const int barWidth = 40;
 
-    double progress = (double)epoch / total_epochs;
-    int pos = barWidth * progress;
+    double progress = (double)(epoch + 1) / total_epochs;
+    int percent = int(progress * 100);
+    int pos = barWidth * percent / 100;
 
-    std::cout << "\rEpoch " << epoch << "/" << total_epochs << " [";
+    std::string bar = "\rEpoch ";
+    bar += std::to_string(epoch + 1);
+    bar += "/";
+    bar += std::to_string(total_epochs);
+    bar += " [";
 
-    for (int i = 0; i < barWidth; ++i) {
-        if (i < pos) std::cout << "=";
-        else if (i == pos) std::cout << ">";
-        else std::cout << " ";
+    for (int i = 0; i < barWidth; i++) {
+        if (i < pos) bar += '=';
+        else if (i == pos) bar += '>';
+        else bar += ' ';
     }
 
-    std::cout << "] "
-              << std::fixed << std::setprecision(4)
-              << progress * 100 << "% "
-              << "loss=" << loss
-              << std::flush;
+    bar += "] ";
+    bar += std::to_string(percent);
+    bar += "% ";
+
+    std::ostringstream loss_stream;
+    loss_stream << std::fixed << std::setprecision(6) << loss;
+
+    bar += "loss=" + loss_stream.str();
+
+    std::cout << (percent == 99 ? GREEN : "") << bar << std::flush;
 }
 
 //Progress bar for data loading
@@ -59,8 +69,7 @@ void printProgress(size_t current, size_t total){
     }
 
     bar += "] " + std::to_string(percent + 1) + "%";
-
-    std::cout << bar << std::flush;
+    std::cout << (percent == 99 ? GREEN : "") << bar << std::flush << RESET;
 }
 
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
@@ -142,7 +151,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
             buffer.clear();
         }
 	} else  {
-		std::cout << "Could not open the file\n";
+		std::cout << RED << "Could not open the file\n" << RESET;
         exit(1);
     }
 
@@ -156,7 +165,7 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
         }
     }
 
-    std::cout << "\nDataset loaded\n";
+    std::cout << GREEN << "\nDataset loaded\n" << RESET;
 
     return dataset(data, ans, test_data, test_ans);
 }
@@ -223,7 +232,7 @@ void NeuralNetwork::setWeights() {
 
 void NeuralNetwork::addLayer(unsigned neurons, activeFunction activeFunc){
     if (neurons <= 0){
-        std::cout << "Cannot add layer with <1 neurons\n";
+        std::cout << RED << "Cannot add layer with <1 neurons\n" << RESET;
         exit(1);
     }
 
@@ -260,7 +269,7 @@ void NeuralNetwork::print(){
 
 void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t, lossFunction loss_t){
     if(network.first < 2){
-        std::cout << "Cannot compile model, less than 2 layers\n";
+        std::cout << RED << "Cannot compile model, less than 2 layers\n" << RESET;
         exit(1);
     }
 
@@ -281,7 +290,7 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     }
 
     this->setWeights();
-    std::cout << "Compiling is done!\n";
+    std::cout << GREEN << "Compiling is done!\n" << RESET;
 }
 
 void NeuralNetwork::feedForward(std::vector<double> *data) {
@@ -355,7 +364,7 @@ double NeuralNetwork::lossFunc(std::vector<std::vector<double>> *Ytrue, std::vec
 
 
 void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers) {
-    std::cout << '\n';
+    std::cout << '\n' << YELLOW;
     //*d_X | Cleans after every iteration
     std::vector<std::vector<double>> d_X;
     //* GRADs | Cleans after any iteration
@@ -485,5 +494,5 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
         
         Ypred.clear();
     }
-    std::cout << "\nDone!\n";
+    std::cout << GREEN << "\nDone!\n\n" << RESET;
 }

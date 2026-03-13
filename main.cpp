@@ -1,11 +1,6 @@
 #include <iostream>
 #include "NN.h"
 
-#define RED     "\033[31m"
-#define GREEN   "\033[32m"
-#define YELLOW  "\033[33m"
-#define RESET   "\033[0m"
-
 int main(int argc, char* argv[]){
     
     if (argc < 4) {
@@ -33,30 +28,16 @@ int main(int argc, char* argv[]){
 
     net.fit(&samples.data, &samples.answers);
 
-    // vector<double> test;
-    // test.resize(INPUT_SIZE);
-    // while (true){
-    //     std::cout << "Input >>";
-    //     for (unsigned i = 0; i < INPUT_SIZE; i++){            
-    //         std::cin >> test[i];
-    //     }
-    //     net.feedForward(&test);
-
-    //     net.output();
-    // }
-
-    //? DATA TEST MODULE
+    std::cout << "Testing" << std::endl << "-------" << std::endl;
 
     int correct = 0;
     for (unsigned i = 0; i < samples.test_data.size(); i++){
-        std::cout << "Row " << i << " testing..." << '\n';
 
         net.feedForward(&(samples.test_data[i]));
 
         std::vector<double> *pred = net.getOut();
         std::vector<double> &true_ans = samples.test_answers[i];
 
-        
         int pred_class = 0;
         int true_class = 0;
         
@@ -74,21 +55,18 @@ int main(int argc, char* argv[]){
 
         if (pred_class == true_class){
             correct++;
-            std::cout << GREEN << "Got -->" << *pred << '\n';
-            std::cout << "True ->" << true_ans << '\n';            
-            std::cout << "Correct\n";
+            std::cout << GREEN;
         } else {
-            std::cout << RED << "Got -->" << *pred << '\n';
-            std::cout << "True ->" << true_ans << '\n';
-            std::cout << "Wrong\n";
+            std::cout << RED;
         }
-
-        std::cout << RESET << '\n';
+        
+        std::cout << "Got --> " << *pred << std::endl;
+        std::cout << "True --> " << true_ans << std::endl << std::endl << RESET;
     }
 
     double accuracy = (double)correct / samples.test_data.size();
 
-    std::cout << "Test accuracy = " << accuracy * 100 << "%\n";
+    std::cout << "--------------------" << std::endl << (accuracy >= 0.75 ? GREEN : RED) << "Test accuracy = " << accuracy * 100 << "%" << RESET;
 
     return 0;
 }
