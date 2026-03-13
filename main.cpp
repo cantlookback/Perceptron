@@ -19,13 +19,13 @@ int main(int argc, char* argv[]){
     NeuralNetwork net;
 
     net.addLayer(INPUT_SIZE);
-    net.addLayer(8, SIGMOID);
-    net.addLayer(4, SIGMOID);
-    net.addLayer(classesCount, SOFTMAX);
+    net.addLayer(8, activeFunction::SIGMOID);
+    net.addLayer(4, activeFunction::SIGMOID);
+    net.addLayer(classesCount, activeFunction::SOFTMAX);
 
-    net.compile(0.7, 0.1, 1000, 1, categorical_crossentropy);
+    net.compile(0.7, 0.1, 1000, 1, lossFunction::categorical_crossentropy);
 
-    net.fit(&samples.data, &samples.answers);
+    net.fit(samples.data, samples.answers);
 
     std::cout << "Testing" << std::endl << "-------" << std::endl;
 

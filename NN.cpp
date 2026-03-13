@@ -72,7 +72,7 @@ void printProgress(size_t current, size_t total){
     std::cout << (percent == 99 ? GREEN : "") << bar << std::flush << RESET;
 }
 
-dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
+dataset loadData(const std::string &PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
     //Container with all samples (data, answers)
     std::vector<std::vector<double>> content;
@@ -170,31 +170,20 @@ dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     return dataset(data, ans, test_data, test_ans);
 }
 
-template <typename T>
-std::ostream& operator<<(std::ostream &os, std::vector<T> &values) {
-    os << '[';
-    for (unsigned i = 0; i < values.size(); i++){
-        os << values[i];
-        if (i != values.size() - 1) os << ", ";
-    }
-    os << ']';
-    return os;
-}
-
 NeuralNetwork::NeuralNetwork(){};
 
 double NeuralNetwork::actFunc(double arg, activeFunction f){
     switch (f){
-        case SIGMOID:
+        case activeFunction::SIGMOID:
             return 1 / (1 + expl(-arg));
         break;
-        case RELU:
+        case activeFunction::RELU:
             return arg < 0 ? 0 : arg;
         break;
-        case TANH:
+        case activeFunction::TANH:
             return tanh(arg);
         break;
-        case SOFTMAX:
+        case activeFunction::SOFTMAX:
             //! Calculates in FeedForward()
         break;
     }
@@ -203,16 +192,16 @@ double NeuralNetwork::actFunc(double arg, activeFunction f){
 
 double NeuralNetwork::func_deriv(double arg, activeFunction f){
     switch (f){
-        case SIGMOID:
+        case activeFunction::SIGMOID:
             return arg * (1 - arg);
         break;
-        case RELU:
+        case activeFunction::RELU:
             return arg < 0 ? 0 : 1;
         break;
-        case TANH:
+        case activeFunction::TANH:
             return 1 - pow(arg, 2);
         break;
-        case SOFTMAX:
+        case activeFunction::SOFTMAX:
             //! Calculates in FeedForward()
         break;
     }
@@ -236,17 +225,12 @@ void NeuralNetwork::addLayer(unsigned neurons, activeFunction activeFunc){
         exit(1);
     }
 
-    network.first++;
-    network.second.push_back({neurons, activeFunc});
-}
-
-std::vector<double>* NeuralNetwork::getOut(){
-    return &values[network.first - 1];
+    layers.push_back({neurons, activeFunc});
 }
 
 void NeuralNetwork::print(){
-    for (auto layer : network.second){
-        for (int i = 0; i < layer.first; i++){
+    for (auto layer : layers){
+        for (int i = 0; i < layer.neurons; i++){
             std::cout << "O  ";
         }
         std::cout << "\n-----------\n";
@@ -263,7 +247,7 @@ void NeuralNetwork::print(){
 }
 
 void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t, bool bias_t, lossFunction loss_t){
-    if(network.first < 2){
+    if(layers.size() < 2){
         std::cout << RED << "Cannot compile model, less than 2 layers\n" << RESET;
         exit(1);
     }
@@ -274,21 +258,21 @@ void NeuralNetwork::compile(double trainRate_t, double alpha_t, double epochs_t,
     bias = bias_t;
     loss = loss_t;
 
-    weights.resize(network.first - 1);
-    for (int i = 0; i < network.first - 1; i++) {
-        weights[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
+    weights.resize(layers.size() - 1);
+    for (int i = 0; i < layers.size() - 1; i++) {
+        weights[i].resize(layers[i].neurons * layers[i + 1].neurons + bias * layers[i + 1].neurons);
     }
 
-    values.resize(network.first);
+    values.resize(layers.size());
     for (unsigned i = 0; i <= weights.size(); i++) {
-        values[i].resize(network.second[i].first);
+        values[i].resize(layers[i].neurons);
     }
 
     this->setWeights();
     std::cout << GREEN << "Compiling is done!\n" << RESET;
 }
 
-void NeuralNetwork::feedForward(std::vector<double> *data) {
+void NeuralNetwork::feedForward(const std::vector<double> &data) {
     //Clearing values and
     //Copy data to input layer
     for (int i = 0; i < values.size(); i++){
@@ -296,7 +280,7 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
             values[i][j] = 0;
         }
     }
-    values[0] = *data;
+    values[0] = data;
 
     //! For each layer, starting with i = 1
     //! For each neuron from the i layer and after
@@ -304,22 +288,22 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
     //! Value of current neuron = SUM of previous layer neurons * appropriate weight
     //! Then using activation function on our value
 
-    for (unsigned i = 1; i < network.first; i++) {        //Layers
-        for (unsigned j = 0; j < network.second[i].first; j++) {        //Neurons on i layer
-            for (unsigned k = 0; k < network.second[i - 1].first; k++) {        //Neurons on i - 1 layer
-                values[i][j] += values[i - 1][k] * weights[i - 1][k * network.second[i].first + j];
+    for (unsigned i = 1; i < layers.size(); i++) {        //Layers
+        for (unsigned j = 0; j < layers[i].neurons; j++) {        //Neurons on i layer
+            for (unsigned k = 0; k < layers[i - 1].neurons; k++) {        //Neurons on i - 1 layer
+                values[i][j] += values[i - 1][k] * weights[i - 1][k * layers[i].neurons + j];
             }
-            if (bias) values[i][j] += 1 * weights[i - 1][weights[i - 1].size() - network.second[i].first + j];
-            if (network.second[i].second != SOFTMAX){
-                values[i][j] = actFunc(values[i][j], network.second[i].second);
+            if (bias) values[i][j] += 1 * weights[i - 1][weights[i - 1].size() - layers[i].neurons + j];
+            if (layers[i].activation != activeFunction::SOFTMAX){
+                values[i][j] = actFunc(values[i][j], layers[i].activation);
             }
         }
     }
 
     // Softmax activation (numerically stable)
-    if (network.second[network.first - 1].second == SOFTMAX) {
+    if (layers[layers.size() - 1].activation == activeFunction::SOFTMAX) {
 
-        auto &layer = values[network.first - 1];
+        auto &layer = values[layers.size() - 1];
         std::vector<double> out(layer.size());
 
         double max_val = *std::max_element(layer.begin(), layer.end());
@@ -331,40 +315,40 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
         for (size_t i = 0; i < layer.size(); i++)
             out[i] = expl(layer[i] - max_val) / sum;
 
-        values[network.first - 1] = out;
+        values[layers.size() - 1] = out;
     }
 }
 
 std::vector<double> NeuralNetwork::predict(const std::vector<double>& input) {
     std::vector<double> data = input;
-    feedForward(&data);
-    return values[network.first - 1];
+    feedForward(data);
+    return values[layers.size() - 1];
 }
 
-double NeuralNetwork::lossFunc(std::vector<std::vector<double>> *Ytrue, std::vector<std::vector<double>> *Ypred){
+double NeuralNetwork::lossFunc(std::vector<std::vector<double>> &Ytrue, std::vector<std::vector<double>> &Ypred){
     double losses = 0;
     switch (loss){
-        case MSE:
-            for (unsigned i = 0; i < Ytrue->size(); i++){
-                losses += pow((*Ytrue)[i][0] - (*Ypred)[i][0], 2);
+        case lossFunction::MSE:
+            for (unsigned i = 0; i < Ytrue.size(); i++){
+                losses += pow(Ytrue[i][0] - Ypred[i][0], 2);
             }
-            losses /= Ytrue->size();
+            losses /= Ytrue.size();
         break;
-        case categorical_crossentropy:
-            for (unsigned i = 0; i < Ytrue->size(); i++){
-                for (unsigned j = 0; j < (*Ytrue)[i].size(); j++){
-                    double p = std::max((*Ypred)[i][j], 1e-15);
-                    losses -= (*Ytrue)[i][j] * log(p);
+        case lossFunction::categorical_crossentropy:
+            for (unsigned i = 0; i < Ytrue.size(); i++){
+                for (unsigned j = 0; j < Ytrue[i].size(); j++){
+                    double p = std::max(Ypred[i][j], 1e-15);
+                    losses -= Ytrue[i][j] * log(p);
                 }
             }
-            losses /= Ytrue->size();
+            losses /= Ytrue.size();
         break;
     }
     return losses;
 }
 
 
-void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers) {
+void NeuralNetwork::fit(std::vector<std::vector<double>> &data, std::vector<std::vector<double>> &answers) {
     std::cout << '\n' << YELLOW;
     //*d_X | Cleans after every iteration
     std::vector<std::vector<double>> d_X;
@@ -373,18 +357,18 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
     //* dW | no Cleans
     std::vector<std::vector<double>> dW;
     //* last layer index
-    unsigned last = network.first - 1;
+    unsigned last = layers.size() - 1;
 
-    d_X.resize(network.first);
+    d_X.resize(layers.size());
     GRADs.resize(last);
     dW.resize(weights.size());
 
     for (unsigned i = 0; i < d_X.size(); i++) {
-        d_X[i].resize(network.second[i].first + (i == d_X.size() - 1 ? 0 : bias));
+        d_X[i].resize(layers[i].neurons + (i == d_X.size() - 1 ? 0 : bias));
     }
 
     for (int i = 0; i < last; i++) {
-        GRADs[i].resize(network.second[i].first * network.second[i + 1].first + bias * network.second[i + 1].first);
+        GRADs[i].resize(layers[i].neurons * layers[i + 1].neurons + bias * layers[i + 1].neurons);
     }
 
     for (int i = 0; i < dW.size(); i++){
@@ -395,23 +379,23 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
         //Vector for loss calculation
         std::vector<std::vector<double>> Ypred;
 
-        for (unsigned set = 0; set < data->size(); set++) {
+        for (unsigned set = 0; set < data.size(); set++) {
             //Feeding data to the net
-            feedForward(&(*data)[set]);
+            feedForward(data[set]);
 
-            unsigned n = network.second[last].first;
+            unsigned n = layers[last].neurons;
             
-            if (network.second[last].second == SOFTMAX) {
-                if (loss == categorical_crossentropy) {
+            if (layers[last].activation == activeFunction::SOFTMAX) {
+                if (loss == lossFunction::categorical_crossentropy) {
                     //Softmax + CrossEntropy
                     for (unsigned i = 0; i < n; i++)
-                        d_X[last][i] = (*answers)[set][i] - values[last][i];
+                        d_X[last][i] = answers[set][i] - values[last][i];
                 } else {
                     std::vector<double> dL_dy(n);
                     //Softmax + Another loss function
-                    if (loss == MSE) {
+                    if (loss == lossFunction::MSE) {
                         for (unsigned i = 0; i < n; i++)
-                            dL_dy[i] = values[last][i] - (*answers)[set][i];
+                            dL_dy[i] = values[last][i] - answers[set][i];
                     }
 
                     for (unsigned i = 0; i < n; i++) {
@@ -433,20 +417,20 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
             } else {
                 for (unsigned i = 0; i < d_X[last].size(); i++)
                     d_X[last][i] =
-                        ((*answers)[set][i] - values[last][i]) *
-                        func_deriv(values[last][i], network.second[last].second);
+                        (answers[set][i] - values[last][i]) *
+                        func_deriv(values[last][i], layers[last].activation);
             }
 
             //Calculating all other derives
             for (int i = last - 1; i >= 0; i--) {
                 for (unsigned j = 0; j < d_X[i].size(); j++) {
                     for (unsigned k = 0; k < d_X[i + 1].size() - (i < last - 1 ? bias : 0); k++) {
-                            d_X[i][j] += d_X[i + 1][k] * weights[i][j * network.second[i + 1].first + k];
+                            d_X[i][j] += d_X[i + 1][k] * weights[i][j * layers[i + 1].neurons + k];
                     }
                     if (bias && (j == d_X[i].size() - 1)){
-                        d_X[i][j] *= func_deriv(1, network.second[i].second);
+                        d_X[i][j] *= func_deriv(1, layers[i].activation);
                     } else {
-                        d_X[i][j] *= func_deriv(values[i][j], network.second[i].second);
+                        d_X[i][j] *= func_deriv(values[i][j], layers[i].activation);
                     }
                 }
             }
@@ -454,10 +438,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
             //Calculating Gradients
             for (unsigned i = 0; i < GRADs.size(); i++) {
                 for (unsigned j = 0; j < GRADs[i].size(); j++) {
-                    if (bias && (j >= (network.second[i].first * network.second[i + 1].first))){
-                        GRADs[i][j] = 1 * d_X[i + 1][j % network.second[i + 1].first];
+                    if (bias && (j >= (layers[i].neurons * layers[i + 1].neurons))){
+                        GRADs[i][j] = 1 * d_X[i + 1][j % layers[i + 1].neurons];
                     } else {
-                        GRADs[i][j] = values[i][j / network.second[i + 1].first] * d_X[i + 1][j % network.second[i + 1].first];
+                        GRADs[i][j] = values[i][j / layers[i + 1].neurons] * d_X[i + 1][j % layers[i + 1].neurons];
                     }
                 }
             }
@@ -490,7 +474,7 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
             Ypred.push_back(values[last]);
         }
 
-        double loss_val = lossFunc(answers, &Ypred);
+        double loss_val = lossFunc(answers, Ypred);
         printProgress(epoc, epochs, loss_val);
         
         Ypred.clear();
