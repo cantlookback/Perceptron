@@ -16,6 +16,28 @@ void normalizeData(std::vector<std::vector<double>> *data){
     }
 }
 
+void printProgress(unsigned epoch, unsigned total_epochs, double loss)
+{
+    const int barWidth = 40;
+
+    double progress = (double)epoch / total_epochs;
+    int pos = barWidth * progress;
+
+    std::cout << "\rEpoch " << epoch << "/" << total_epochs << " [";
+
+    for (int i = 0; i < barWidth; ++i) {
+        if (i < pos) std::cout << "=";
+        else if (i == pos) std::cout << ">";
+        else std::cout << " ";
+    }
+
+    std::cout << "] "
+              << std::fixed << std::setprecision(4)
+              << progress * 100 << "% "
+              << "loss=" << loss
+              << std::flush;
+}
+
 dataset loadData(std::string PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT){
     std::fstream dataFile(PATH, std::ios::in);
     //Container with all samples (data, answers)
@@ -421,7 +443,10 @@ void NeuralNetwork::fit(std::vector<std::vector<double>> *data, std::vector<std:
             }
             Ypred.push_back(values[last]);
         }
-        std::cout << '\r' << epoc << " Epoch, loss = " << lossFunc(answers, &Ypred) << std::flush;
+
+        double loss_val = lossFunc(answers, &Ypred);
+        printProgress(epoc, epochs, loss_val);
+        
         Ypred.clear();
     }
     std::cout << "\nDone!\n";
