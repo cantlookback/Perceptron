@@ -247,16 +247,21 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
         }
     }
 
-    //SoftMax activation
-    if (network.second[network.first - 1].second == SOFTMAX){
-        std::vector<double> out;
-        for (unsigned i = 0; i < network.second[network.first - 1].first; i++){
-            double sum = 0;
-            for (unsigned j = 0; j < network.second[network.first - 1].first; j++){
-                sum += expl(values[network.first - 1][j]);
-            }
-            out.push_back(expl(values[network.first - 1][i]) / sum);
-        }
+    // Softmax activation (numerically stable)
+    if (network.second[network.first - 1].second == SOFTMAX) {
+
+        auto &layer = values[network.first - 1];
+        std::vector<double> out(layer.size());
+
+        double max_val = *std::max_element(layer.begin(), layer.end());
+
+        double sum = 0.0;
+        for (double v : layer)
+            sum += expl(v - max_val);
+
+        for (size_t i = 0; i < layer.size(); i++)
+            out[i] = expl(layer[i] - max_val) / sum;
+
         values[network.first - 1] = out;
     }
 }
