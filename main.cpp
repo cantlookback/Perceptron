@@ -1,10 +1,11 @@
 #include <iostream>
+
 #include "NN.h"
 
-int main(int argc, char* argv[]){
-    
+int main(int argc, char* argv[]) {
     if (argc < 4) {
-        std::cout << "Usage: program <dataset.csv> <answer_size> <classes_count>\n";
+        std::cout
+            << "Usage: program <dataset.csv> <answer_size> <classes_count>\n";
         return 1;
     }
 
@@ -30,40 +31,40 @@ int main(int argc, char* argv[]){
     std::cout << "Testing" << std::endl << "-------" << std::endl;
 
     int correct = 0;
-    for (unsigned i = 0; i < samples.test_data.size(); i++){
-
+    for (unsigned i = 0; i < samples.test_data.size(); i++) {
         std::vector<double> pred = net.predict(samples.test_data[i]);
-        std::vector<double> &true_ans = samples.test_answers[i];
+        std::vector<double>& true_ans = samples.test_answers[i];
 
         int pred_class = 0;
         int true_class = 0;
-        
-        for (unsigned j = 1; j < pred.size(); j++){
-            if (pred[j] > pred[pred_class])
-            pred_class = j;
+
+        for (unsigned j = 1; j < pred.size(); j++) {
+            if (pred[j] > pred[pred_class]) pred_class = j;
         }
-        
-        for (unsigned j = 0; j < true_ans.size(); j++){
-            if (true_ans[j] == 1){
+
+        for (unsigned j = 0; j < true_ans.size(); j++) {
+            if (true_ans[j] == 1) {
                 true_class = j;
                 break;
             }
         }
 
-        if (pred_class == true_class){
+        if (pred_class == true_class) {
             correct++;
             std::cout << GREEN;
         } else {
             std::cout << RED;
         }
-        
+
         std::cout << "Got --> " << pred << std::endl;
         std::cout << "True --> " << true_ans << std::endl << std::endl << RESET;
     }
 
     double accuracy = (double)correct / samples.test_data.size();
 
-    std::cout << "--------------------" << std::endl << (accuracy >= 0.75 ? GREEN : RED) << "Test accuracy = " << accuracy * 100 << "%" << RESET;
+    std::cout << "--------------------" << std::endl
+              << (accuracy >= 0.75 ? GREEN : RED)
+              << "Test accuracy = " << accuracy * 100 << "%" << RESET;
 
     return 0;
 }
