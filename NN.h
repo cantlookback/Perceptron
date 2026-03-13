@@ -64,19 +64,18 @@ public:
     //View a model
     void print();
 
-    //Printing the results of using NN
-    void output();
-
     //Train
     void fit(std::vector<std::vector<double>> *data, std::vector<std::vector<double>> *answers);
 
-    //Running...
-    void feedForward(std::vector<double> *data);
+    //Getting prediction
+    std::vector<double> predict(const std::vector<double> &input);
 
+private:
     //Getting output values
     std::vector<double>* getOut();
 
-private:
+    //Running...
+    void feedForward(std::vector<double> *data);
 
     //Activation Funcions switch
     double actFunc(double arg, activeFunction f);

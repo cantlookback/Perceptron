@@ -240,11 +240,6 @@ void NeuralNetwork::addLayer(unsigned neurons, activeFunction activeFunc){
     network.second.push_back({neurons, activeFunc});
 }
 
-void NeuralNetwork::output(){
-    std::cout << values[network.first - 1] << '\n';
-    return;
-}
-
 std::vector<double>* NeuralNetwork::getOut(){
     return &values[network.first - 1];
 }
@@ -338,6 +333,12 @@ void NeuralNetwork::feedForward(std::vector<double> *data) {
 
         values[network.first - 1] = out;
     }
+}
+
+std::vector<double> NeuralNetwork::predict(const std::vector<double>& input) {
+    std::vector<double> data = input;
+    feedForward(&data);
+    return values[network.first - 1];
 }
 
 double NeuralNetwork::lossFunc(std::vector<std::vector<double>> *Ytrue, std::vector<std::vector<double>> *Ypred){

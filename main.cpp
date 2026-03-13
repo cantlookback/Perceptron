@@ -13,7 +13,6 @@ int main(int argc, char* argv[]){
     int classesCount = std::stoi(argv[3]);
 
     dataset samples = loadData(dataset_path, answerSize, classesCount);
-    //Iris -- 0.7, 0.1, 1000, 1 || [4, 8, 4, 3]
 
     unsigned INPUT_SIZE = samples.data[0].size();
 
@@ -33,16 +32,14 @@ int main(int argc, char* argv[]){
     int correct = 0;
     for (unsigned i = 0; i < samples.test_data.size(); i++){
 
-        net.feedForward(&(samples.test_data[i]));
-
-        std::vector<double> *pred = net.getOut();
+        std::vector<double> pred = net.predict(samples.test_data[i]);
         std::vector<double> &true_ans = samples.test_answers[i];
 
         int pred_class = 0;
         int true_class = 0;
         
-        for (unsigned j = 1; j < pred->size(); j++){
-            if ((*pred)[j] > (*pred)[pred_class])
+        for (unsigned j = 1; j < pred.size(); j++){
+            if (pred[j] > pred[pred_class])
             pred_class = j;
         }
         
@@ -60,7 +57,7 @@ int main(int argc, char* argv[]){
             std::cout << RED;
         }
         
-        std::cout << "Got --> " << *pred << std::endl;
+        std::cout << "Got --> " << pred << std::endl;
         std::cout << "True --> " << true_ans << std::endl << std::endl << RESET;
     }
 
