@@ -6,10 +6,18 @@
 #define YELLOW  "\033[33m"
 #define RESET   "\033[0m"
 
-using namespace std;
+int main(int argc, char* argv[]){
+    
+    if (argc < 4) {
+        std::cout << "Usage: program <dataset.csv> <answer_size> <classes_count>\n";
+        return 1;
+    }
 
-int main(){
-    dataset samples = loadData("C:/pomoika/Perceptron/data/IrisTrain3.csv", 1, 3);
+    std::string dataset_path = argv[1];
+    int answerSize = std::stoi(argv[2]);
+    int classesCount = std::stoi(argv[3]);
+
+    dataset samples = loadData(dataset_path, answerSize, classesCount);
     //Iris -- 0.7, 0.1, 1000, 1 || [4, 8, 4, 3]
 
     unsigned INPUT_SIZE = samples.data[0].size();
@@ -19,7 +27,7 @@ int main(){
     net.addLayer(INPUT_SIZE);
     net.addLayer(8, SIGMOID);
     net.addLayer(4, SIGMOID);
-    net.addLayer(3, SOFTMAX);
+    net.addLayer(classesCount, SOFTMAX);
 
     net.compile(0.7, 0.1, 1000, 1, categorical_crossentropy);
 
@@ -40,7 +48,6 @@ int main(){
     //? DATA TEST MODULE
 
     int correct = 0;
-
     for (unsigned i = 0; i < samples.test_data.size(); i++){
         std::cout << "Row " << i << " testing..." << '\n';
 
