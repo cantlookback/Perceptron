@@ -48,7 +48,7 @@ void printProgress(unsigned epoch, unsigned total_epochs, double loss) {
 
     bar += "loss=" + loss_stream.str();
 
-    std::cout << (percent == 99 ? GREEN : "") << bar << std::flush;
+    std::cout << (percent == 100 ? GREEN : "") << bar << std::flush;
 }
 
 // Progress bar for data loading
@@ -74,7 +74,7 @@ void printProgress(size_t current, size_t total) {
     }
 
     bar += "] " + std::to_string(percent + 1) + "%";
-    std::cout << (percent == 99 ? GREEN : "") << bar << std::flush << RESET;
+    std::cout << (percent == 100 ? GREEN : "") << bar << std::flush << RESET;
 }
 
 dataset loadData(const std::string& PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT) {
@@ -374,71 +374,79 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>& data, std::vector<std:
     for (int i = 0; i < dW.size(); i++) {
         dW[i].resize(weights[i].size());
     }
-
+    
     for (unsigned epoc = 0; epoc < epochs; epoc++) {
         // Vector for loss calculation
         std::vector<std::vector<double>> Ypred;
+        Ypred.reserve(data.size());
 
-        for (unsigned set = 0; set < data.size(); set++) {
-            // Feeding data to the net
-            feedForward(data[set]);
+        for (unsigned batch_start = 0; batch_start < data.size(); batch_start += batch_size) {
+            unsigned batch_end = std::min(batch_start + batch_size, (unsigned)data.size());
 
-            unsigned n = layers[last].neurons;
+            for (unsigned set = batch_start; set < batch_end; set++) {
+                // Feeding data to the net
+                feedForward(data[set]);
 
-            if (layers[last].activation == activeFunction::SOFTMAX) {
-                if (loss == lossFunction::categorical_crossentropy) {
-                    // Softmax + CrossEntropy
-                    for (unsigned i = 0; i < n; i++) d_X[last][i] = answers[set][i] - values[last][i];
-                } else {
-                    std::vector<double> dL_dy(n);
-                    // Softmax + Another loss function
-                    if (loss == lossFunction::MSE) {
-                        for (unsigned i = 0; i < n; i++) dL_dy[i] = values[last][i] - answers[set][i];
-                    }
+                unsigned n = layers[last].neurons;
 
-                    for (unsigned i = 0; i < n; i++) {
-                        double grad = 0;
-
-                        for (unsigned j = 0; j < n; j++) {
-                            double d_soft;
-
-                            if (i == j)
-                                d_soft = values[last][i] * (1 - values[last][i]);
-                            else
-                                d_soft = -values[last][i] * values[last][j];
-
-                            grad += dL_dy[j] * d_soft;
+                if (layers[last].activation == activeFunction::SOFTMAX) {
+                    if (loss == lossFunction::categorical_crossentropy) {
+                        // Softmax + CrossEntropy
+                        for (unsigned i = 0; i < n; i++) d_X[last][i] = answers[set][i] - values[last][i];
+                    } else {
+                        std::vector<double> dL_dy(n);
+                        // Softmax + Another loss function
+                        if (loss == lossFunction::MSE) {
+                            for (unsigned i = 0; i < n; i++) dL_dy[i] = values[last][i] - answers[set][i];
                         }
-                        d_X[last][i] = grad;
-                    }
-                }
-            } else {
-                for (unsigned i = 0; i < d_X[last].size(); i++) d_X[last][i] = (answers[set][i] - values[last][i]) * func_deriv(values[last][i], layers[last].activation);
-            }
 
-            // Calculating all other derives
-            for (int i = last - 1; i >= 0; i--) {
-                for (unsigned j = 0; j < d_X[i].size(); j++) {
-                    for (unsigned k = 0; k < d_X[i + 1].size() - (i < last - 1 ? bias : 0); k++) {
-                        d_X[i][j] += d_X[i + 1][k] * weights[i][j * layers[i + 1].neurons + k];
-                    }
-                    if (bias && (j == d_X[i].size() - 1)) {
-                        d_X[i][j] *= func_deriv(1, layers[i].activation);
-                    } else {
-                        d_X[i][j] *= func_deriv(values[i][j], layers[i].activation);
-                    }
-                }
-            }
+                        for (unsigned i = 0; i < n; i++) {
+                            double grad = 0;
 
-            // Calculating Gradients
-            for (unsigned i = 0; i < GRADs.size(); i++) {
-                for (unsigned j = 0; j < GRADs[i].size(); j++) {
-                    if (bias && (j >= (layers[i].neurons * layers[i + 1].neurons))) {
-                        GRADs[i][j] = 1 * d_X[i + 1][j % layers[i + 1].neurons];
-                    } else {
-                        GRADs[i][j] = values[i][j / layers[i + 1].neurons] * d_X[i + 1][j % layers[i + 1].neurons];
+                            for (unsigned j = 0; j < n; j++) {
+                                double d_soft;
+
+                                if (i == j)
+                                    d_soft = values[last][i] * (1 - values[last][i]);
+                                else
+                                    d_soft = -values[last][i] * values[last][j];
+
+                                grad += dL_dy[j] * d_soft;
+                            }
+                            d_X[last][i] = grad;
+                        }
+                    }
+                } else {
+                    for (unsigned i = 0; i < layers[last].neurons; i++) d_X[last][i] = (answers[set][i] - values[last][i]) * func_deriv(values[last][i], layers[last].activation);
+                }
+
+                // Calculating all other derives
+                for (int i = last - 1; i >= 0; i--) {
+                    unsigned next_n = layers[i + 1].neurons;
+                    for (unsigned j = 0; j < layers[i].neurons; j++) {
+                        double* w = &weights[i][j * next_n];
+                        for (unsigned k = 0; k < d_X[i + 1].size() - (i < last - 1 ? bias : 0); k++) {
+                            d_X[i][j] += d_X[i + 1][k] * w[k];
+                        }
+                        if (bias && (j == d_X[i].size() - 1)) {
+                            d_X[i][j] *= func_deriv(1, layers[i].activation);
+                        } else {
+                            d_X[i][j] *= func_deriv(values[i][j], layers[i].activation);
+                        }
                     }
                 }
+
+                // Calculating Gradients
+                for (unsigned i = 0; i < GRADs.size(); i++) {
+                    for (unsigned j = 0; j < GRADs[i].size(); j++) {
+                        if (bias && (j >= (layers[i].neurons * layers[i + 1].neurons))) {
+                            GRADs[i][j] += 1 * d_X[i + 1][j % layers[i + 1].neurons];
+                        } else {
+                            GRADs[i][j] += values[i][j / layers[i + 1].neurons] * d_X[i + 1][j % layers[i + 1].neurons];
+                        }
+                    }
+                }
+                Ypred.push_back(values[last]);
             }
 
             // Calculating dW
@@ -456,22 +464,13 @@ void NeuralNetwork::fit(std::vector<std::vector<double>>& data, std::vector<std:
             }
 
             // Clearing for next iteration
-            for (unsigned i = 0; i < d_X.size(); i++) {
-                for (unsigned j = 0; j < d_X[i].size(); j++) {
-                    d_X[i][j] = 0;
-                }
-            }
+            for (auto &d_x : d_X)
+                std::fill(d_x.begin(), d_x.end(), 0);
 
-            for (unsigned i = 0; i < GRADs.size(); i++) {
-                for (unsigned j = 0; j < GRADs[i].size(); j++) {
-                    GRADs[i][j] = 0;
-                }
-            }
-            Ypred.push_back(values[last]);
+            for (auto &grad : GRADs)
+                std::fill(grad.begin(), grad.end(), 0);
         }
-        double loss_val = lossFunc(answers, Ypred);
-        printProgress(epoc, epochs, loss_val);
-
+        printProgress(epoc, epochs, lossFunc(answers, Ypred));
         Ypred.clear();
     }
     std::cout << GREEN << "\nDone!\n\n" << RESET;

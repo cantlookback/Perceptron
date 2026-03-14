@@ -20,11 +20,11 @@ int main(int argc, char* argv[]) {
     NeuralNetwork net;
 
     net.addLayer(INPUT_SIZE);
-    net.addLayer(8, activeFunction::SIGMOID);
-    net.addLayer(4, activeFunction::SIGMOID);
+    // net.addLayer(8, activeFunction::SIGMOID);
+    net.addLayer(2, activeFunction::SIGMOID);
     net.addLayer(classesCount, activeFunction::SOFTMAX);
 
-    net.compile(0.7, 0.1, 1000, 1, lossFunction::categorical_crossentropy, 32);
+    net.compile(0.7, 0.1, 50, 1, lossFunction::categorical_crossentropy, 1);
 
     net.fit(samples.data, samples.answers);
 
@@ -56,13 +56,13 @@ int main(int argc, char* argv[]) {
             std::cout << RED;
         }
 
-        std::cout << "Got --> " << pred << std::endl;
-        std::cout << "True --> " << true_ans << std::endl << std::endl << RESET;
+        //std::cout << "Got --> " << pred << std::endl;
+        //std::cout << "True --> " << true_ans << std::endl << std::endl;
     }
 
     double accuracy = (double)correct / samples.test_data.size();
 
-    std::cout << "--------------------" << std::endl
+    std::cout << RESET << "--------------------" << std::endl
               << (accuracy >= 0.75 ? GREEN : RED)
               << "Test accuracy = " << accuracy * 100 << "%" << RESET;
 
