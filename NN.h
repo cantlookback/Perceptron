@@ -1,5 +1,8 @@
 #ifndef NN_H_
 #define NN_H_
+
+#include "NN_utils.h"
+
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -9,60 +12,6 @@
 #include <sstream>
 #include <vector>
 
-constexpr const char* RED = "\033[31m";
-constexpr const char* GREEN = "\033[32m";
-constexpr const char* YELLOW = "\033[33m";
-constexpr const char* RESET = "\033[0m";
-
-// Loss Function enumeration
-enum class lossFunction {
-    MSE = 1,
-    categorical_crossentropy,
-};
-
-// Activation Functions enumeration
-enum class activeFunction {
-    SIGMOID = 1,
-    RELU,
-    TANH,
-    SOFTMAX,
-};
-
-// Custom structure for dataset
-struct dataset {
-    dataset(const std::vector<std::vector<double>>& t_data,
-            const std::vector<std::vector<double>>& t_answers,
-            const std::vector<std::vector<double>>& t_test_data,
-            const std::vector<std::vector<double>>& t_test_answers)
-        : data(t_data),
-          answers(t_answers),
-          test_data(t_test_data),
-          test_answers(t_test_answers) {};
-
-    // Train part
-    std::vector<std::vector<double>> data;
-    std::vector<std::vector<double>> answers;
-    // Test part
-    std::vector<std::vector<double>> test_data;
-    std::vector<std::vector<double>> test_answers;
-};
-
-// PATH - path to .csv file
-// ANS_COUNT - number of answer values
-// OUTPUT_COUNT - number of classes
-dataset loadData(const std::string& PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT);
-
-// Overload for vector<> printing
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& values) {
-    os << '[';
-    for (size_t i = 0; i < values.size(); i++) {
-        os << values[i];
-        if (i != values.size() - 1) os << ", ";
-    }
-    os << ']';
-    return os;
-}
 class NeuralNetwork {
 public:
     NeuralNetwork();

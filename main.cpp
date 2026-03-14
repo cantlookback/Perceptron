@@ -2,29 +2,32 @@
 
 #include "NN.h"
 
-int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        std::cout
-            << "Usage: program <dataset.csv> <answer_size> <classes_count>\n";
-        return 1;
-    }
+int main() {
+    json cfg = loadConfig("config.json");
 
-    std::string dataset_path = argv[1];
-    int answerSize = std::stoi(argv[2]);
-    int classesCount = std::stoi(argv[3]);
+    std::string filepath = cfg["dataset"]["filepath"];
 
-    dataset samples = loadData(dataset_path, answerSize, classesCount);
+    int answerSize = cfg["dataset"]["answerSize"];
 
-    unsigned INPUT_SIZE = samples.data[0].size();
+    int classesCount = cfg["dataset"]["classesCount"];
+
+    dataset samples = loadData(filepath, answerSize, classesCount);
 
     NeuralNetwork net;
 
-    net.addLayer(INPUT_SIZE);
-    // net.addLayer(8, activeFunction::SIGMOID);
-    net.addLayer(2, activeFunction::SIGMOID);
-    net.addLayer(classesCount, activeFunction::SOFTMAX);
+    unsigned INPUT_SIZE = samples.data[0].size();
 
-    net.compile(0.7, 0.1, 50, 1, lossFunction::categorical_crossentropy, 1);
+    net.addLayer(INPUT_SIZE);
+
+    for (auto& layer : cfg["layers"]) {
+        int neurons = layer["neurons"];
+        std::string act = layer["activation"];
+
+        net.addLayer(neurons, parseActivation(act));
+    }
+    lossFunction loss = parseLoss(cfg["network"]["loss"]);
+    
+    net.compile(cfg["network"]["trainRate"], cfg["network"]["alpha"], cfg["network"]["epochs"], cfg["network"]["bias"], loss, cfg["network"]["batch_size"]);
 
     net.fit(samples.data, samples.answers);
 
@@ -56,15 +59,13 @@ int main(int argc, char* argv[]) {
             std::cout << RED;
         }
 
-        //std::cout << "Got --> " << pred << std::endl;
-        //std::cout << "True --> " << true_ans << std::endl << std::endl;
+        // std::cout << "Got --> " << pred << std::endl;
+        // std::cout << "True --> " << true_ans << std::endl << std::endl;
     }
 
     double accuracy = (double)correct / samples.test_data.size();
 
-    std::cout << RESET << "--------------------" << std::endl
-              << (accuracy >= 0.75 ? GREEN : RED)
-              << "Test accuracy = " << accuracy * 100 << "%" << RESET;
+    std::cout << RESET << "--------------------" << std::endl << (accuracy >= 0.75 ? GREEN : RED) << "Test accuracy = " << accuracy * 100 << "%" << RESET;
 
     return 0;
 }

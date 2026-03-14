@@ -1,0 +1,25 @@
+{
+    "dataset": {
+        "filepath": "./data/iris.csv",
+        "answerSize": 1,
+        "classesCount": 3
+    },
+    "network": {
+        "bias": true,
+        "trainRate": 0.7,
+        "alpha": 0.1,
+        "epochs": 3,
+        "batch_size": 1,
+        "loss": "crossentropy"
+    },
+    "layers": [
+        {
+            "neurons": 4,
+            "activation": "sigmoid"
+        },
+        {
+            "neurons": 3,
+            "activation": "softmax"
+        }
+    ]
+}
