@@ -164,7 +164,7 @@ void printProgress(unsigned epoch, unsigned total_epochs, double loss) {
 
     bar += "loss=" + loss_stream.str();
 
-    std::cout << (percent == 100 ? GREEN : "") << bar << std::flush;
+    std::cout << (percent == 100 ? GREEN : YELLOW) << bar << std::flush;
 }
 
 // Progress bar for data loading
@@ -190,7 +190,7 @@ void printProgress(size_t current, size_t total) {
     }
 
     bar += "] " + std::to_string(percent + 1) + "%";
-    std::cout << (percent == 100 ? GREEN : "") << bar << std::flush << RESET;
+    std::cout << (percent == 99 ? GREEN : YELLOW) << bar << std::flush << RESET;
 }
 
 activeFunction parseActivation(const std::string& name) {

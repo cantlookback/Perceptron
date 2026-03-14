@@ -175,7 +175,6 @@ double NeuralNetwork::lossFunc(std::vector<std::vector<double>>& Ytrue, std::vec
 }
 
 void NeuralNetwork::fit(std::vector<std::vector<double>>& data, std::vector<std::vector<double>>& answers) {
-    std::cout << '\n' << YELLOW;
     //*d_X | Cleans after every iteration
     std::vector<std::vector<double>> d_X;
     //* GRADs | Cleans after any iteration
