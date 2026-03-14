@@ -1,6 +1,6 @@
 {
   "dataset": {
-    "filepath": "./data/diabetes.csv",
+    "filepath": "./data/iris.csv",
     "answerSize": 1,
     "classesCount": 3
   },
@@ -15,7 +15,6 @@
   },
 
   "layers": [
-    { "neurons": 8, "activation": "sigmoid" },
     { "neurons": 4, "activation": "sigmoid" },
     { "neurons": 3, "activation": "softmax" }
   ]
