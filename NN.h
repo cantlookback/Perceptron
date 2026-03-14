@@ -50,8 +50,7 @@ struct dataset {
 // PATH - path to .csv file
 // ANS_COUNT - number of answer values
 // OUTPUT_COUNT - number of classes
-dataset loadData(const std::string& PATH, unsigned ANS_COUNT,
-                 unsigned OUTPUT_COUNT);
+dataset loadData(const std::string& PATH, unsigned ANS_COUNT, unsigned OUTPUT_COUNT);
 
 // Overload for vector<> printing
 template <typename T>
@@ -69,19 +68,16 @@ public:
     NeuralNetwork();
 
     // Adding layer in NN
-    void addLayer(unsigned neurons,
-                  activeFunction activeFunc = activeFunction::SIGMOID);
+    void addLayer(unsigned neurons, activeFunction activeFunc = activeFunction::SIGMOID);
 
     // Setting additional parameters for Network
-    void compile(double trainRate_t, double alpha_t, double epochs, bool bias,
-                 lossFunction loss_t);
+    void compile(double trainRate_t=1, double alpha_t=1, double epochs_t=100, bool bias_t=0, lossFunction loss_t=lossFunction::MSE, unsigned batch_size_t=1);
 
     // View a model
     void print();
 
     // Train
-    void fit(std::vector<std::vector<double>>& data,
-             std::vector<std::vector<double>>& answers);
+    void fit(std::vector<std::vector<double>>& data, std::vector<std::vector<double>>& answers);
 
     // Getting prediction
     std::vector<double> predict(const std::vector<double>& input);
@@ -106,17 +102,17 @@ private:
     void setWeights();
 
     // Loss Functions switch
-    double lossFunc(std::vector<std::vector<double>>& Ytrue,
-                    std::vector<std::vector<double>>& Ypred);
+    double lossFunc(std::vector<std::vector<double>>& Ytrue, std::vector<std::vector<double>>& Ypred);
 
     //*Vector of NN layers
     std::vector<Layer> layers;
     //*Weights of axons || Values of neurons in each layer
     std::vector<std::vector<double>> weights, values;
     //*Hyperparameters
-    double trainRate = 1, alpha = 1, epochs = 500;
+    double trainRate, alpha;
+    unsigned epochs, batch_size;
     //*Bias marker
-    bool bias = 0;
+    bool bias;
     //*Loss function for switch
     lossFunction loss;
 };

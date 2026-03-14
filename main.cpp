@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     net.addLayer(4, activeFunction::SIGMOID);
     net.addLayer(classesCount, activeFunction::SOFTMAX);
 
-    net.compile(0.7, 0.1, 1000, 1, lossFunction::categorical_crossentropy);
+    net.compile(0.7, 0.1, 1000, 1, lossFunction::categorical_crossentropy, 32);
 
     net.fit(samples.data, samples.answers);
 
