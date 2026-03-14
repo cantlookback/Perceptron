@@ -1,0 +1,22 @@
+{
+  "dataset": {
+    "filepath": "./data/diabetes.csv",
+    "answerSize": 1,
+    "classesCount": 3
+  },
+
+  "network": {
+    "bias": true,
+    "trainRate": 0.7,
+    "alpha": 0.1,
+    "epochs": 300,
+    "batch_size": 1,
+    "loss": "crossentropy"
+  },
+
+  "layers": [
+    { "neurons": 8, "activation": "sigmoid" },
+    { "neurons": 4, "activation": "sigmoid" },
+    { "neurons": 3, "activation": "softmax" }
+  ]
+}
