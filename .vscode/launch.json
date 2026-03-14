@@ -23,7 +23,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "NNlibrary"
+            "preLaunchTask": "Perceptron"
         }
     ]
 }

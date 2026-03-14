@@ -3,54 +3,12 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "Standard",
-			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
-			"args": [
-				"-fdiagnostics-color=always",
-				"-g",
-				"${file}",
-				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "build",
-			},
-			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\gcc.exe"
-		},
-		{
-			"type": "cppbuild",
 			"label": "Perceptron",
-			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+			"command": "g++",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
-				"${file}",
-				"Neural.cpp",
-				"-o",
-				"${fileDirname}\\${fileBasenameNoExtension}.exe"
-			],
-			"options": {
-				"cwd": "${fileDirname}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build",
-			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\gcc.exe"
-		},
-		{
-			"type": "cppbuild",
-			"label": "NNlibrary",
-			"command": "C:\\msys64\\mingw64\\bin\\gcc.exe",
-			"args": [
-				"-fdiagnostics-color=always",
-				"-g",
+				"-O3",
 				"${file}",
 				"NN.cpp",
 				"-o",
@@ -63,7 +21,7 @@
 				"$gcc"
 			],
 			"group": "build",
-			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\gcc.exe"
+			"detail": "компилятор: C:\\msys64\\mingw64\\bin\\g++.exe"
 		}
 	]
 }
