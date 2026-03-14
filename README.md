@@ -18,6 +18,6 @@
 
 To build .exe file through GNU use
 
-    g++.exe -g main.cpp NN.cpp -o main.exe
+    g++.exe -g -O3 main.cpp NN.cpp -o main.exe
 
 ### May differ depending on the compiler you are using
