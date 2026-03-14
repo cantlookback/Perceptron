@@ -1,6 +1,6 @@
 {
     "dataset": {
-        "filepath": "./data/diabetes.csv",
+        "filepath": "./data/iris.csv",
         "answerSize": 1,
         "classesCount": 3
     },
