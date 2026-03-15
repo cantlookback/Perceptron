@@ -16,7 +16,8 @@ The project demonstrates how a neural network can be implemented using basic lin
 
 ### Activation Functions
 
-- Implemented activation functions:
+Implemented activation functions:
+
 - Sigmoid
 - ReLU
 - Tanh
